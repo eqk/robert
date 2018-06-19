@@ -1,0 +1,14 @@
+{
+  "name": "robert",
+  "version": "1.0.0",
+  "description": "trading bot",
+  "repository": "bitbucket:eqk/https://eqk@bitbucket.org/eqk/robert.git",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Krylov Danil",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^4.19.1"
+  }
+}
