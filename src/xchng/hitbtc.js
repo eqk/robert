@@ -5,7 +5,7 @@
  */
 
 
-import {utils} from './utils';
+import {utils} from '../utils';
 import request from 'request';
 import map from 'lodash/map';
 
@@ -72,7 +72,9 @@ export class HitbtcService {
                 json: true
             };
 
-            if (this.config.proxy) { options['proxy'] = this.config.proxy; }
+            if (this.config.proxy) {
+                options['proxy'] = this.config.proxy;
+            }
 
             request(options, (err, response, body) => {
                 if (response && parseInt(response.statusCode) === 200) {
@@ -118,6 +120,7 @@ export class HitbtcService {
 
     maxbid_minask() {
         const pair = this.pair;
+        if (!pair) throw Error('Pair not set!');
         const url = `public/ticker/${pair}`;
         return new Promise((resolve, reject) => {
             setTimeout(() => resolve(null), 30000);
@@ -132,24 +135,36 @@ export class HitbtcService {
             }, err => {
                 console.error(err);
                 resolve(null);
-            });
+            })
+                .catch(reject);
         });
     }
 
     getOrders(limit = 50) {
         return new Promise((resolve, reject) => {
             const pair = this.pair;
+            if (!pair) throw Error('Pair not set!');
             this.get(`public/orderbook/${pair}`, {limit: limit}).then(res => {
                 const response = res['data'];
                 const bids = response['ask'].map(i => [i['price'], i['size'], this.name]);
                 const asks = response['bid'].map(i => [i['price'], i['size'], this.name]);
                 resolve({bids: bids, asks: asks});
-            }, err => { reject(err); });
+            }, err => {
+                reject(err);
+            })
+                .catch(reject);
         });
     }
 
     getOrder(clientOrderId) {
-        return this.get(`order/${clientOrderId}`);
+        return this.get(`order/${clientOrderId}`)
+            .then((res) => {
+                if (res.success === true) {
+                    return res.data;
+                } else {
+                    return false;
+                }
+            });
     }
 
     isCancel(id) {
@@ -162,36 +177,44 @@ export class HitbtcService {
 
     userOpenOrders() {
         const pair = this.pair;
-
+        if (!pair) throw Error('Pair not set!');
         return new Promise((resolve, reject) => {
             this.get(`order`, {symbol: pair}).then(res => {
                 resolve(res['data']);
-            }, err => { reject(err); });
+            }, err => {
+                reject(err);
+            });
         });
 
     }
 
     balance() {
-        return new Promise(resolve => {
-            this.get('trading/balance').then(res => {
-                const array = map(res['data'], (item) => {
-                    return {currency: item['currency'].toLowerCase(), value: item['available']};
-                });
+        return new Promise((resolve, reject) => {
+            this.get('trading/balance')
+                .then(res => {
+                    const array = map(res['data'], (item) => {
+                        return {currency: item['currency'].toLowerCase(), value: item['available']};
+                    });
 
-                resolve(array);
-            });
-
+                    resolve(array);
+                })
+                .catch(reject);
         });
     }
 
     orderCreate(quantity, price, type) {
         const pair = this.pair;
-
+        if (!pair) throw Error('Pair not set!');
         return new Promise((resolve, reject) => {
             this.post('order', {symbol: pair, quantity: quantity, price: price, side: type, type: 'limit'})
                 .then(
-                    res => { resolve({order_id: res['data']['clientOrderId']}); },
-                    err => {reject(err); });
+                    res => {
+                        resolve({order_id: res['data']['clientOrderId']});
+                    },
+                    err => {
+                        reject(err);
+                    })
+                .catch(reject);
         });
     }
 
@@ -201,7 +224,9 @@ export class HitbtcService {
 
     tradeHistory(limit = 50, opt = {}) {
         return new Promise((resolve) => {
-            if (opt.timeout) { setTimeout(() => resolve(null), opt.timeout);}
+            if (opt.timeout) {
+                setTimeout(() => resolve(null), opt.timeout);
+            }
             this.get(`public/trades/${this.pair}`, {limit: 500}).then(res => {
                 let response = res.data;
                 response = response.map(item => {
@@ -210,7 +235,7 @@ export class HitbtcService {
                         price: item.price,
                         amount: item.quantity,
                         type: item.side,
-                        date: new Date(date.getTime() + (3*60*60*1000)),
+                        date: new Date(date.getTime() + (3 * 60 * 60 * 1000)),
                         exchange: this.name
                     };
                 });
@@ -219,7 +244,9 @@ export class HitbtcService {
                 let buy = response.filter(item => item.type === 'buy').splice(0, limit);
                 resolve({sell: sell, buy: buy});
 
-            }, () => { resolve(null); });
+            }, () => {
+                resolve(null);
+            });
         });
     }
 }

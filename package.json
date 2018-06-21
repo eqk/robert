@@ -4,11 +4,26 @@
   "description": "trading bot",
   "repository": "bitbucket:eqk/https://eqk@bitbucket.org/eqk/robert.git",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --require babel-core/register",
+    "start": "nodemon src/server --exec babel-node",
+    "build": "babel src -d dist"
   },
   "author": "Krylov Danil",
   "license": "ISC",
   "devDependencies": {
-    "eslint": "^4.19.1"
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-es2015-classes": "^6.24.1",
+    "babel-plugin-transform-es2015-parameters": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
+    "eslint": "^4.19.1",
+    "mocha": "^5.2.0",
+    "nodemon": "^1.17.5"
+  },
+  "dependencies": {
+    "crypto-js": "^3.1.9-1",
+    "lodash": "^4.17.10",
+    "request": "^2.87.0"
   }
 }

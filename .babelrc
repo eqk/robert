@@ -1,0 +1,17 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
+    ]
+  ],
+  "plugins": [
+    "transform-class-properties",
+    "transform-es2015-classes",
+    "transform-es2015-parameters"
+  ]
+}
