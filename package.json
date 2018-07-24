@@ -5,7 +5,9 @@
   "repository": "bitbucket:eqk/https://eqk@bitbucket.org/eqk/robert.git",
   "scripts": {
     "test": "mocha --require babel-core/register",
-    "start": "nodemon src/server --exec babel-node",
+    "start": "nodemon scr --exec babel-node",
+    "start1": "nodemon src/orderReceiver --exec babel-node",
+    "start2": "nodemon src/orde --exec babel-node",
     "build": "babel src -d dist"
   },
   "author": "Krylov Danil",
@@ -24,6 +26,7 @@
   "dependencies": {
     "crypto-js": "^3.1.9-1",
     "lodash": "^4.17.10",
+    "mysql": "^2.15.0",
     "request": "^2.87.0"
   }
 }

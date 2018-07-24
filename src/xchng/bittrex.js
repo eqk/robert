@@ -12,52 +12,43 @@ import map from 'lodash/map';
 
 export class BittrexService {
 
-    pairs = [   'BTC-LTC', 'BTC-DOGE', 'BTC-VTC', 'BTC-PPC', 'BTC-FTC', 'BTC-RDD',
-                'BTC-NXT', 'BTC-DASH', 'BTC-POT', 'BTC-BLK', 'BTC-EMC2', 'BTC-XMY',
-                'BTC-AUR', 'BTC-EFL', 'BTC-GLD', 'BTC-SLR', 'BTC-PTC', 'BTC-GRS',
-                'BTC-NLG', 'BTC-RBY', 'BTC-XWC', 'BTC-MONA', 'BTC-THC', 'BTC-ENRG',
-                'BTC-ERC', 'BTC-VRC', 'BTC-CURE', 'BTC-XMR', 'BTC-CLOAK', 'BTC-START',
-                'BTC-KORE', 'BTC-XDN', 'BTC-TRUST', 'BTC-NAV', 'BTC-XST', 'BTC-BTCD',
-                'BTC-VIA', 'BTC-PINK', 'BTC-IOC', 'BTC-CANN', 'BTC-SYS', 'BTC-NEOS',
-                'BTC-DGB', 'BTC-BURST', 'BTC-EXCL', 'BTC-SWIFT', 'BTC-DOPE', 'BTC-BLOCK',
-                'BTC-ABY', 'BTC-BYC', 'BTC-XMG', 'BTC-BLITZ', 'BTC-BAY', 'BTC-FAIR',
-                'BTC-SPR', 'BTC-VTR', 'BTC-XRP', 'BTC-GAME', 'BTC-COVAL', 'BTC-NXS',
-                'BTC-XCP', 'BTC-BITB', 'BTC-GEO', 'BTC-FLDC', 'BTC-GRC', 'BTC-FLO',
-                'BTC-NBT', 'BTC-MUE', 'BTC-XEM', 'BTC-CLAM', 'BTC-DMD', 'BTC-GAM',
-                'BTC-SPHR', 'BTC-OK', 'BTC-SNRG', 'BTC-PKB', 'BTC-CPC', 'BTC-AEON',
-                'BTC-ETH', 'BTC-GCR', 'BTC-TX', 'BTC-BCY', 'BTC-EXP', 'BTC-INFX',
-                'BTC-OMNI', 'BTC-AMP', 'BTC-AGRS', 'BTC-XLM', 'USDT-BTC', 'BTC-CLUB',
-                'BTC-VOX', 'BTC-EMC', 'BTC-FCT', 'BTC-MAID', 'BTC-EGC', 'BTC-SLS',
-                'BTC-RADS', 'BTC-DCR', 'BTC-SAFEX', 'BTC-BSD', 'BTC-XVG', 'BTC-PIVX',
-                'BTC-XVC', 'BTC-MEME', 'BTC-STEEM', 'BTC-2GIVE', 'BTC-LSK', 'BTC-PDC',
-                'BTC-BRK', 'BTC-DGD', 'ETH-DGD', 'BTC-WAVES', 'BTC-RISE', 'BTC-LBC',
-                'BTC-SBD', 'BTC-BRX', 'BTC-ETC', 'ETH-ETC', 'BTC-STRAT', 'BTC-UNB',
-                'BTC-SYNX', 'BTC-TRIG', 'BTC-EBST', 'BTC-VRM', 'BTC-SEQ', 'BTC-XAUR',
-                'BTC-SNGLS', 'BTC-REP', 'BTC-SHIFT', 'BTC-ARDR', 'BTC-XZC', 'BTC-NEO',
-                'BTC-ZEC', 'BTC-ZCL', 'BTC-IOP', 'BTC-GOLOS', 'BTC-UBQ', 'BTC-KMD',
-                'BTC-GBG', 'BTC-SIB', 'BTC-ION', 'BTC-LMC', 'BTC-QWARK', 'BTC-CRW',
-                'BTC-SWT', 'BTC-TIME', 'BTC-MLN', 'BTC-ARK', 'BTC-DYN', 'BTC-TKS',
-                'BTC-MUSIC', 'BTC-DTB', 'BTC-INCNT', 'BTC-GBYTE', 'BTC-GNT', 'BTC-NXC',
-                'BTC-EDG', 'BTC-LGD', 'BTC-TRST', 'ETH-GNT', 'ETH-REP', 'USDT-ETH',
-                'ETH-WINGS', 'BTC-WINGS', 'BTC-RLC', 'BTC-GNO', 'BTC-GUP', 'BTC-LUN',
-                'ETH-GUP', 'ETH-RLC', 'ETH-LUN', 'ETH-SNGLS', 'ETH-GNO', 'BTC-APX',
-                'BTC-TKN', 'ETH-TKN', 'BTC-HMQ', 'ETH-HMQ', 'BTC-ANT', 'ETH-TRST',
-                'ETH-ANT', 'BTC-SC', 'ETH-BAT', 'BTC-BAT', 'BTC-ZEN', 'BTC-1ST',
-                'BTC-QRL', 'ETH-1ST', 'ETH-QRL', 'BTC-CRB', 'ETH-CRB', 'ETH-LGD',
-                'BTC-PTOY', 'ETH-PTOY', 'BTC-MYST', 'ETH-MYST', 'BTC-CFI', 'ETH-CFI',
-                'BTC-BNT', 'ETH-BNT', 'BTC-NMR', 'ETH-NMR', 'ETH-TIME', 'ETH-LTC',
-                'ETH-XRP', 'BTC-SNT', 'ETH-SNT', 'BTC-DCT', 'BTC-XEL', 'BTC-MCO',
-                'ETH-MCO', 'BTC-ADT', 'ETH-ADT', 'BTC-FUN', 'ETH-FUN', 'BTC-PAY',
-                'ETH-PAY', 'BTC-MTL', 'ETH-MTL', 'BTC-STORJ', 'ETH-STORJ', 'BTC-ADX',
-                'ETH-ADX', 'ETH-DASH', 'ETH-SC', 'ETH-ZEC', 'USDT-ZEC', 'USDT-LTC',
-                'USDT-ETC', 'USDT-XRP', 'BTC-OMG', 'ETH-OMG', 'BTC-CVC', 'ETH-CVC',
-                'BTC-PART', 'BTC-QTUM', 'ETH-QTUM', 'ETH-XMR', 'ETH-XEM', 'ETH-XLM',
-                'ETH-NEO', 'USDT-XMR', 'USDT-DASH', 'ETH-BCC', 'USDT-BCC', 'BTC-BCC',
-                'BTC-DNT', 'ETH-DNT', 'USDT-NEO', 'ETH-WAVES', 'ETH-STRAT', 'ETH-DGB',
-                'ETH-FCT', 'USDT-OMG', 'BTC-ADA', 'BTC-MANA', 'ETH-MANA', 'BTC-SALT',
-                'ETH-SALT', 'BTC-TIX', 'ETH-TIX', 'BTC-RCN', 'ETH-RCN', 'BTC-VIB',
-                'ETH-VIB', 'BTC-MER', 'BTC-POWR', 'ETH-POWR', 'BTC-BTG', 'ETH-BTG',
-                'USDT-BTG', 'ETH-ADA', 'BTC-ENG', 'ETH-ENG'
+    pairs = [
+        'BTC-LTC','BTC-DOGE','BTC-VTC','BTC-PPC','BTC-FTC','BTC-RDD','BTC-NXT','BTC-DASH',
+        'BTC-POT','BTC-BLK','BTC-EMC2','BTC-XMY','BTC-AUR','BTC-EFL','BTC-GLD','BTC-SLR',
+        'BTC-PTC','BTC-GRS','BTC-NLG','BTC-RBY','BTC-XWC','BTC-MONA','BTC-THC','BTC-ENRG',
+        'BTC-ERC','BTC-VRC','BTC-CURE','BTC-XMR','BTC-CLOAK','BTC-KORE','BTC-XDN','BTC-TRUST',
+        'BTC-NAV','BTC-XST','BTC-VIA','BTC-PINK','BTC-IOC','BTC-CANN','BTC-SYS','BTC-NEOS',
+        'BTC-DGB','BTC-BURST','BTC-EXCL','BTC-BITS','BTC-DOPE','BTC-BLOCK','BTC-ABY','BTC-BYC',
+        'BTC-XMG','BTC-BAY','BTC-SPR','BTC-VTR','BTC-XRP','BTC-GAME','BTC-COVAL','BTC-NXS',
+        'BTC-XCP','BTC-BITB','BTC-GEO','BTC-FLDC','BTC-GRC','BTC-FLO','BTC-NBT','BTC-MUE',
+        'BTC-XEM','BTC-CLAM','BTC-DMD','BTC-GAM','BTC-SPHR','BTC-OK','BTC-AEON','BTC-ETH',
+        'BTC-TX','BTC-BCY','BTC-EXP','BTC-OMNI','BTC-AMP','BTC-XLM','USDT-BTC','BTC-RVR',
+        'BTC-EMC','BTC-FCT','BTC-EGC','BTC-SLS','BTC-RADS','BTC-DCR','BTC-BSD','BTC-XVG',
+        'BTC-PIVX','BTC-MEME','BTC-STEEM','BTC-2GIVE','BTC-LSK','BTC-BRK','BTC-WAVES',
+        'BTC-LBC','BTC-SBD','BTC-BRX','BTC-ETC','ETH-ETC','BTC-STRAT','BTC-UNB','BTC-SYNX',
+        'BTC-EBST','BTC-VRM','BTC-SEQ','BTC-REP','BTC-SHIFT','BTC-ARDR','BTC-XZC','BTC-NEO',
+        'BTC-ZEC','BTC-ZCL','BTC-IOP','BTC-GOLOS','BTC-UBQ','BTC-KMD','BTC-GBG','BTC-SIB',
+        'BTC-ION','BTC-LMC','BTC-QWARK','BTC-CRW','BTC-SWT','BTC-MLN','BTC-ARK','BTC-DYN',
+        'BTC-TKS','BTC-MUSIC','BTC-DTB','BTC-INCNT','BTC-GBYTE','BTC-GNT','BTC-NXC','BTC-EDG',
+        'BTC-MORE','ETH-GNT','ETH-REP','USDT-ETH','ETH-WINGS','BTC-WINGS','BTC-RLC','BTC-GNO',
+        'BTC-GUP','BTC-LUN','ETH-GUP','ETH-RLC','ETH-LUN','ETH-GNO','BTC-HMQ','ETH-HMQ',
+        'BTC-ANT','ETH-ANT','BTC-SC','ETH-BAT','BTC-BAT','BTC-ZEN','BTC-QRL','BTC-CRB',
+        'ETH-MORE','BTC-PTOY','BTC-CFI','ETH-CFI','BTC-BNT','ETH-BNT','BTC-NMR','ETH-NMR',
+        'ETH-LTC','ETH-XRP','BTC-SNT','ETH-SNT','BTC-DCT','BTC-XEL','BTC-MCO','ETH-MCO',
+        'BTC-ADT','ETH-ADT','BTC-PAY','ETH-PAY','BTC-STORJ','BTC-ADX','ETH-ADX','ETH-DASH',
+        'ETH-SC','ETH-ZEC','USDT-ZEC','USDT-LTC','USDT-ETC','USDT-XRP','BTC-OMG','ETH-OMG',
+        'BTC-CVC','ETH-CVC','BTC-PART','BTC-QTUM','ETH-QTUM','ETH-XMR','ETH-XEM','ETH-XLM',
+        'ETH-NEO','USDT-XMR','USDT-DASH','ETH-BCH','USDT-BCH','BTC-BCH','BTC-DNT','ETH-DNT',
+        'USDT-NEO','ETH-WAVES','ETH-STRAT','ETH-DGB','ETH-FCT','USDT-OMG','BTC-ADA','BTC-MANA',
+        'ETH-MANA','BTC-SALT','ETH-SALT','BTC-TIX','ETH-TIX','BTC-RCN','ETH-RCN','BTC-VIB',
+        'ETH-VIB','BTC-MER','BTC-POWR','ETH-POWR','BTC-BTG','ETH-BTG','USDT-BTG','ETH-ADA',
+        'BTC-ENG','ETH-ENG','USDT-ADA','USDT-XVG','USDT-NXT','BTC-UKG','ETH-UKG','BTC-IGNIS',
+        'BTC-SRN','ETH-SRN','BTC-WAX','ETH-WAX','BTC-ZRX','ETH-ZRX','BTC-VEE','ETH-VEE',
+        'BTC-BCPT','ETH-BCPT','BTC-TRX','ETH-TRX','BTC-TUSD','BTC-LRC','ETH-LRC','ETH-TUSD',
+        'BTC-UP','ETH-UP','BTC-DMT','ETH-DMT','USDT-TUSD','BTC-POLY','ETH-POLY','BTC-PRO',
+        'ETH-PRO','USDT-SC','USDT-TRX','BTC-BLT','ETH-BLT','BTC-STORM','ETH-STORM','BTC-AID',
+        'ETH-AID','BTC-NGC','ETH-NGC','BTC-GTO','ETH-GTO','USDT-DCR','BTC-OCN','ETH-OCN',
+        'USD-BTC','USD-USDT','USD-TUSD','BTC-TUBE','BTC-CBC','BTC-CMCT','USD-ETH','BTC-NLC2'
     ];
 
     arPair = [];
@@ -75,17 +66,7 @@ export class BittrexService {
         this.config.proxy = (opt.proxy) ? opt.proxy : '';
     }
 
-    modifyPair(arPair) {
-        arPair[0] = (arPair[0].toUpperCase() === 'USD') ? 'USDT' : arPair[0].toUpperCase();
-        arPair[1] = (arPair[1].toUpperCase() === 'USD') ? 'USDT' : arPair[1].toUpperCase();
-
-        arPair[0] = (arPair[0].toUpperCase() === 'BCH') ? 'BCC' : arPair[0].toUpperCase();
-        arPair[1] = (arPair[1].toUpperCase() === 'BCH') ? 'BCC' : arPair[1].toUpperCase();
-        return arPair;
-    }
-
     isAvailable(arPair) {
-        arPair = this.modifyPair(arPair);
         const pairs = this.pairs;
         const varOne = `${arPair[0]}-${arPair[1]}`.toUpperCase();
         const varTwo = `${arPair[1]}-${arPair[0]}`.toUpperCase();
@@ -93,19 +74,18 @@ export class BittrexService {
     }
 
     setPair(arPair = ['btc', 'usd']) {
-        arPair = this.modifyPair(arPair);
         const pairs = this.pairs;
         const varOne = `${arPair[0]}-${arPair[1]}`.toUpperCase();
         const varTwo = `${arPair[1]}-${arPair[0]}`.toUpperCase();
         if (pairs.indexOf(varOne) + 1) {
             this.pair = varOne;
-            this.arPair = arPair;
+            this.arPair = arPair.slice();
         } else if (pairs.indexOf(varTwo) + 1) {
             this.isInvert = true;
             this.pair = varTwo;
-            this.arPair = arPair.reverse();
+            this.arPair = arPair.reverse().slice();
         } else {
-            this.pair = '';
+            throw Error('Unknown pair!');
         }
     }
 
@@ -194,10 +174,12 @@ export class BittrexService {
 
                 response['buy'] = response['buy'].splice(0, limit);
                 response['sell'] = response['sell'].splice(0, limit);
-
-                const bids = response['buy'].map(i => [i['Rate'], i['Quantity'], this.name]);
-                const asks = response['sell'].map(i => [i['Rate'], i['Quantity'], this.name]);
-                resolve({bids: bids, asks: asks});
+                const lens = (x) => {return {rate: x['Rate'], amount: x['Quantity'], name: this.name}};
+                const bids = response['sell'].map(lens);
+                const asks = response['buy'].map(lens);
+                resolve({name: this.name,
+                    bids: bids, asks: asks,
+                    pairFrom: this.arPair[1].toUpperCase(), pairTo: this.arPair[0].toUpperCase()});
             }, err => {
                 reject(err);
             });
@@ -220,15 +202,28 @@ export class BittrexService {
         });
     }
 
-    orderCreate(amount, price, type) {
+    orderCreate(order) {
         return new Promise((resolve, reject) => {
+            if (order.arPair)
+                this.setPair(order.arPair);
             const pair = this.pair;
-            const type_url = (type === 'sell') ? 'selllimit' : 'buylimit';
+            if (!pair) throw Error('Pair not set!');
+            const type_url = (order.type.toUpperCase() === 'SELL' || order.type.toUpperCase() === 'BID') ? 'selllimit' : 'buylimit';
 
-            this.get(`market/${type_url}`, {market: pair, quantity: amount, rate: price}).then(
-                res => {
-                    resolve({order_id: res['data']['uuid']});
-                }, err => reject(err));
+            setTimeout(() => {
+                console.log(`Bittrex order:
+    type: ${type_url} : ${typeof type_url}
+    pair: ${pair} : ${typeof pair}
+    amount: ${order.amount} : ${typeof order.amount}
+    rate: ${order.rate} : ${typeof order.rate}`);
+                resolve(Object.assign(order, {order_id: ~~(Math.random() * 10000)}));
+            }, Math.random() * 2000);
+            //TODO UNCOMMENT
+            //TODO ERROR RESOLVING
+            // this.get(`market/${type_url}`, {market: pair, quantity: order.amount, rate: order.rate}).then(
+            //     res => {
+            //         resolve(Object.assign(order, {order_id: res['data']['uuid']}));
+            //     }, err => reject(err));
         });
     }
 

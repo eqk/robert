@@ -11,8 +11,111 @@ import map from 'lodash/map';
 
 export class HitbtcService {
 
-    pairs = ['BCNBTC', 'BTCUSD', 'DASHBTC', 'DOGEBTC', 'DOGEUSD', 'DSHBTC', 'EMCBTC', 'ETHBTC', 'FCNBTC', 'LSKBTC', 'LTCBTC', 'LTCUSD', 'NXTBTC', 'QCNBTC', 'SBDBTC', 'SCBTC', 'STEEMBTC', 'XDNBTC', 'XEMBTC', 'XMRBTC', 'ARDRBTC', 'ZECBTC', 'WAVESBTC', 'MAIDBTC', 'AMPBTC', 'BUSBTC', 'DGDBTC', 'ICNBTC', 'SNGLSBTC', '1STBTC', 'XLCBTC', 'TRSTBTC', 'TIMEBTC', 'GNOBTC', 'REPBTC', 'XMRUSD', 'DASHUSD', 'ETHUSD', 'NXTUSD', 'ZRCBTC', 'BOSBTC', 'DCTBTC', 'ANTBTC', 'AEONBTC', 'GUPBTC', 'PLUBTC', 'LUNBTC', 'TAASBTC', 'NXCBTC', 'EDGBTC', 'RLCBTC', 'SWTBTC', 'TKNBTC', 'WINGSBTC', 'XAURBTC', 'AEBTC', 'PTOYBTC', 'WTTBTC', 'ZECUSD', 'XEMUSD', 'BCNUSD', 'XDNUSD', 'MAIDUSD', 'ETCBTC', 'ETCUSD', 'CFIBTC', 'PLBTBTC', 'BNTBTC', 'XDNCOBTC', 'FYNETH', 'SNMETH', 'SNTETH', 'CVCUSD', 'PAYETH', 'OAXETH', 'OMGETH', 'BQXETH', 'XTZBTC', 'CRSUSD', 'DICEBTC', 'CFIETH', 'PTOYETH', '1STETH', 'XAURETH', 'TAASETH', 'TIMEETH', 'DICEETH', 'SWTETH', 'XMRETH', 'ETCETH', 'DASHETH', 'ZECETH', 'PLUETH', 'GNOETH', 'XRPBTC', 'NETETH', 'STRATUSD', 'STRATBTC', 'SNCETH', 'ADXETH', 'BETETH', 'EOSETH', 'DENTETH', 'SANETH', 'EOSBTC', 'EOSUSD', 'MNEBTC', 'MRVETH', 'MSPETH', 'DDFETH', 'XTZETH', 'XTZUSD', 'UETETH', 'MYBETH', 'SURETH', 'IXTETH', 'HRBETH', 'PLRETH', 'TIXETH', 'NDCETH', 'PROETH', 'AVTETH', 'COSSETH', 'PBKXETH', 'PQTUSD', '8BTUSD', 'EVXUSD', 'IMLETH', 'ROOTSETH', 'DLTBTC', 'BNTETH', 'BNTUSD', 'QAUBTC', 'QAUETH', 'MANAUSD', 'DNTBTC', 'FYPBTC', 'OPTBTC', 'GRPHBTC', 'TNTETH', 'STXBTC', 'STXETH', 'STXUSD', 'TNTUSD', 'TNTBTC', 'CATBTC', 'CATETH', 'CATUSD', 'BCHBTC', 'BCHETH', 'BCHUSD', 'ECATETH', 'XUCUSD', 'SNCBTC', 'SNCUSD', 'OAXUSD', 'OAXBTC', 'BASETH', 'ZRXBTC', 'ZRXETH', 'ZRXUSD', 'RVTBTC', 'ICOSBTC', 'ICOSETH', 'ICOSUSD', 'PPCBTC', 'PPCUSD', 'QTUMETH', 'VERIBTC', 'VERIETH', 'VERIUSD', 'IGNISETH', 'PRGBTC', 'PRGETH', 'PRGUSD', 'BMCBTC', 'BMCETH', 'BMCUSD', 'CNDBTC', 'CNDETH', 'CNDUSD', 'SKINBTC', 'EMGOBTC', 'EMGOUSD', 'CDTETH', 'CDTUSD', 'FUNBTC', 'FUNETH', 'FUNUSD', 'HVNBTC', 'HVNETH', 'FUELBTC', 'FUELETH', 'FUELUSD', 'POEBTC', 'POEETH', 'MCAPBTC', 'AIRBTC', 'AIRETH', 'AIRUSD', 'AMBUSD', 'AMBETH', 'AMBBTC', 'NTOBTC', 'ICOBTC', 'PINGBTC', 'RKCETH', 'GAMEBTC', 'TKRETH', 'HPCBTC', 'PPTETH', 'MTHBTC', 'MTHETH', 'WMGOBTC', 'WMGOUSD', 'LRCBTC', 'LRCETH', 'ICXBTC', 'ICXETH', 'NEOBTC', 'NEOETH', 'NEOUSD', 'CSNOBTC', 'ORMEBTC', 'ICXUSD', 'PIXBTC', 'PIXETH', 'INDETH', 'KICKBTC', 'YOYOWBTC', 'MIPSBTC', 'CDTBTC', 'XVGBTC', 'XVGETH', 'XVGUSD', 'DGBBTC', 'DGBETH', 'DGBUSD', 'DCNBTC', 'DCNETH', 'DCNUSD', 'LATBTC', 'CCTETH', 'EBETETH', 'VIBEBTC', 'VOISEBTC', 'ENJBTC', 'ENJETH', 'ENJUSD', 'ZSCBTC', 'ZSCETH', 'ZSCUSD', 'ETBSBTC', 'TRXBTC', 'TRXETH', 'TRXUSD', 'VENBTC', 'VENETH', 'VENUSD', 'ARTBTC', 'EVXBTC', 'EVXETH', 'QVTETH', 'EBTCOLDBTC', 'EBTCOLDETH', 'EBTCOLDUSD', 'BKBBTC', 'EXNBTC', 'TGTBTC', 'ATSETH', 'UGTBTC', 'UGTETH', 'UGTUSD', 'CTRBTC', 'CTRETH', 'CTRUSD', 'BMTBTC', 'BMTETH', 'SUBBTC', 'SUBETH', 'SUBUSD', 'WTCBTC', 'CNXBTC', 'ATBBTC', 'ATBETH', 'ATBUSD', 'ODNBTC', 'BTMBTC', 'BTMETH', 'BTMUSD', 'B2XBTC', 'B2XETH', 'B2XUSD', 'ATMBTC', 'ATMETH', 'ATMUSD', 'LIFEBTC', 'VIBBTC', 'VIBETH', 'VIBUSD', 'DRTETH', 'STUUSD', 'HDGETH', 'OMGBTC', 'PAYBTC', 'COSSBTC', 'PPTBTC', 'SNTBTC', 'BTGBTC', 'BTGETH', 'BTGUSD', 'SMARTBTC', 'SMARTETH', 'SMARTUSD', 'XUCETH', 'XUCBTC', 'CLBTC', 'CLETH', 'CLUSD', 'LAETH', 'CLDBTC', 'CLDETH', 'CLDUSD', 'ELMBTC', 'EDOBTC', 'EDOETH', 'EDOUSD', 'HGTETH', 'POLLBTC', 'IXTBTC', 'PREBTC', 'ATSBTC', 'SCLBTC', 'BCCBTC', 'BCCETH', 'BCCUSD', 'ATLBTC', 'EBTCNEWBTC', 'EBTCNEWETH', 'EBTCNEWUSD', 'ETPBTC', 'ETPETH', 'ETPUSD', 'OTXBTC', 'CDXETH', 'DRPUBTC', 'NEBLBTC', 'NEBLETH', 'HACBTC', 'CTXBTC', 'CTXETH', 'ELEBTC', 'ARNBTC', 'ARNETH', 'SISABTC', 'SISAETH', 'STUBTC', 'STUETH', 'GVTETH', 'BTXBTC', 'BTXUSDT', 'LTCETH', 'BCNETH', 'MAIDETH', 'NXTETH', 'STRATETH', 'XDNETH', 'XEMETH', 'PLRBTC', 'SURBTC', 'BQXBTC', 'DOGEETH', 'ITSBTC', 'PRSBTC', 'KBRBTC', 'TBTBTC', 'EROBTC', 'SMSBTC', 'SMSETH', 'SMSUSD', 'ZAPBTC', 'FRDBTC', 'OTNBTC', 'CAPPUSDT', 'CAPPBTC', 'CAPPETH', 'DBIXBTC', 'XRPETH', 'XRPUSDT', 'HSRBTC', 'INDIBTC'];
-
+    pairs = [
+        'BCNBTC','BTCUSD','DASHBTC','DOGEBTC','DOGEUSD','DSHBTC','EMCBTC','ETHBTC'
+        ,'FCNBTC','LSKBTC','LTCBTC','LTCUSD','NXTBTC','SBDBTC','SCBTC','STEEMBTC'
+        ,'XDNBTC','XEMBTC','XMRBTC','ARDRBTC','ZECBTC','WAVESBTC','MAIDBTC','AMPBTC'
+        ,'BUSBTC','DGDBTC','ICNBTC','SNGLSBTC','1STBTC','TRSTBTC','TIMEBTC','GNOBTC'
+        ,'REPBTC','XMRUSD','DASHUSD','ETHUSD','NXTUSD','ZRCBTC','BOSBTC','DCTBTC'
+        ,'ANTBTC','AEONBTC','GUPBTC','PLUBTC','LUNBTC','TAASBTC','NXCBTC','EDGBTC'
+        ,'RLCBTC','SWTBTC','TKNBTC','WINGSBTC','XAURBTC','AEBTC','PTOYBTC','ZECUSD'
+        ,'XEMUSD','BCNUSD','XDNUSD','MAIDUSD','ETCBTC','ETCUSD','CFIBTC','PLBTBTC'
+        ,'BNTBTC','XDNCOBTC','FYNETH','SNMBTC','SNMETH','SNTETH','CVCUSD','PAYETH'
+        ,'OAXETH','OMGETH','BQXETH','XTZBTC','DICEBTC','CFIETH','PTOYETH','1STETH'
+        ,'XAURETH','TAASETH','TIMEETH','DICEETH','SWTETH','XMRETH','ETCETH','DASHETH'
+        ,'ZECETH','PLUETH','GNOETH','XRPBTC','NETETH','STRATUSD','STRATBTC','SNCETH'
+        ,'ADXETH','BETETH','EOSETH','DENTETH','SANETH','EOSBTC','EOSUSD','MNEBTC'
+        ,'MSPETH','DDFETH','XTZETH','XTZUSD','UETETH','MYBETH','SURETH','IXTETH'
+        ,'PLRETH','TIXETH','NDCETH','PROETH','AVTETH','COSSETH','EVXUSD','DLTBTC'
+        ,'BNTETH','BNTUSD','QAUBTC','QAUETH','MANAUSD','DNTBTC','FYPBTC','OPTBTC'
+        ,'TNTETH','IFTBTC','STXBTC','STXETH','STXUSD','TNTUSD','TNTBTC','CATBTC'
+        ,'CATETH','CATUSD','BCHBTC','BCHETH','BCHUSD','ENGETH','XUCUSD','SNCBTC'
+        ,'SNCUSD','OAXUSD','OAXBTC','BASETH','ZRXBTC','ZRXETH','ZRXUSD','RVTBTC'
+        ,'ICOSBTC','ICOSETH','ICOSUSD','PPCBTC','PPCUSD','QTUMETH','VERIBTC','VERIETH'
+        ,'VERIUSD','IGNISETH','PRGBTC','PRGETH','PRGUSD','BMCBTC','BMCETH','BMCUSD'
+        ,'CNDBTC','CNDETH','CNDUSD','SKINBTC','EMGOBTC','EMGOUSD','CDTETH','CDTUSD'
+        ,'FUNBTC','FUNETH','FUNUSD','HVNBTC','HVNETH','FUELBTC','FUELETH','FUELUSD'
+        ,'POEBTC','POEETH','MCAPBTC','AIRBTC','AIRETH','AIRUSD','AMBUSD','AMBETH'
+        ,'AMBBTC','NTOBTC','ICOBTC','PINGBTC','GAMEBTC','TKRETH','HPCBTC','PPTETH'
+        ,'MTHBTC','MTHETH','WMGOBTC','WMGOUSD','LRCBTC','LRCETH','ICXBTC','ICXETH'
+        ,'NEOBTC','NEOETH','NEOUSD','CSNOBTC','ORMEBTC','ICXUSD','PIXBTC','PIXETH'
+        ,'INDETH','KICKBTC','YOYOWBTC','MIPSBTC','CDTBTC','XVGBTC','XVGETH','XVGUSD'
+        ,'DGBBTC','DGBETH','DGBUSD','DCNBTC','DCNETH','DCNUSD','CCTETH','EBETETH'
+        ,'VIBEBTC','VOISEBTC','ENJBTC','ENJETH','ENJUSD','ZSCBTC','ZSCETH','ZSCUSD'
+        ,'ETBSBTC','TRXBTC','TRXETH','TRXUSD','VENBTC','VENETH','VENUSD','ARTBTC'
+        ,'EVXBTC','EVXETH','QVTETH','EBTCOLDBTC','EBTCOLDETH','EBTCOLDUSD','BKBBTC','EXNBTC'
+        ,'TGTBTC','ATSETH','BMTBTC','BMTETH','SUBBTC','SUBETH','SUBUSD','WTCBTC'
+        ,'CNXBTC','ATBBTC','ATBETH','ATBUSD','ODNBTC','BTMBTC','BTMETH','BTMUSD'
+        ,'B2XBTC','B2XETH','B2XUSD','ATMBTC','ATMETH','ATMUSD','LIFEBTC','VIBBTC'
+        ,'VIBETH','VIBUSD','DRTETH','STUUSD','OMGBTC','PAYBTC','COSSBTC','PPTBTC'
+        ,'SNTBTC','BTGBTC','BTGETH','BTGUSD','SMARTBTC','SMARTETH','SMARTUSD','XUCETH'
+        ,'XUCBTC','CLBTC','CLETH','CLUSD','LAETH','CLDBTC','CLDETH','CLDUSD'
+        ,'EDOBTC','EDOETH','EDOUSD','HGTETH','POLLBTC','IXTBTC','ATSBTC','SCLBTC'
+        ,'ATLBTC','EBTCNEWBTC','EBTCNEWETH','EBTCNEWUSD','ETPBTC','ETPETH','ETPUSD','OTXBTC'
+        ,'CDXETH','DRPUBTC','NEBLBTC','NEBLETH','HACBTC','CTXBTC','CTXETH','ELEBTC'
+        ,'ARNBTC','ARNETH','SISABTC','SISAETH','STUBTC','STUETH','GVTETH','INDIBTC'
+        ,'BTXBTC','LTCETH','BCNETH','MAIDETH','NXTETH','STRATETH','XDNETH','XEMETH'
+        ,'PLRBTC','SURBTC','BQXBTC','DOGEETH','ITSBTC','AMMBTC','AMMETH','AMMUSD'
+        ,'DBIXBTC','PREBTC','KBRBTC','TBTBTC','EROBTC','SMSBTC','SMSETH','SMSUSD'
+        ,'ZAPBTC','DOVBTC','DOVETH','FRDBTC','DRPUETH','OTNBTC','XRPETH','XRPUSDT'
+        ,'HSRBTC','LENDBTC','LENDETH','SPFBTC','SPFETH','SBTCBTC','SBTCETH','BTCABTC'
+        ,'BTCAETH','BTCAUSD','WRCBTC','WRCETH','WRCUSD','LOCBTC','LOCETH','LOCUSD'
+        ,'SWFTCBTC','SWFTCETH','SWFTCUSD','STARETH','SBTCUSDT','STORMBTC','DIMETH','DIMUSD'
+        ,'DIMBTC','NGCBTC','NGCETH','NGCUSD','EMCETH','EMCUSDT','MCOBTC','MCOETH'
+        ,'MCOUSD','MANAETH','MANABTC','ECHBTC','CPAYETH','DATABTC','DATAETH','DATAUSD'
+        ,'UTTBTC','UTTETH','UTTUSD','KMDBTC','KMDETH','KMDUSD','QTUMUSD','QTUMBTC'
+        ,'SNTUSD','OMGUSD','EKOBTC','EKOETH','ADXBTC','ADXUSD','LSKETH','LSKUSD'
+        ,'PLRUSD','SURUSD','BQXUSD','DRTUSDT','REPETH','REPUSDT','TIOBTC','TIOETH'
+        ,'TIOUSD','WAXBTC','WAXETH','WAXUSD','EETBTC','EETETH','EETUSD','C20BTC'
+        ,'C20ETH','IDHBTC','IDHETH','IPLBTC','COVBTC','COVETH','SENTBTC','SENTETH'
+        ,'SENTUSD','SMTBTC','SMTETH','SMTUSD','CVHETH','CVHUSD','CASBTC','CASETH'
+        ,'CASUSD','CHATBTC','CHATETH','CHATUSD','GRMDBTC','AVHBTC','TRACETH','JNTETH'
+        ,'PCLBTC','PCLETH','CLOUTBTC','UTKBTC','UTKETH','UTKUSD','GNXETH','CHSBBTC'
+        ,'CHSBETH','AVHETH','DAYBTC','DAYETH','DAYUSD','NEUBTC','NEUETH','NEUUSD'
+        ,'AVHUSDT','CLOUTETH','CLOUTUSDT','TAUBTC','MEKBTC','FLPBTC','FLPETH','FLPUSD'
+        ,'RBTC','RETH','EKOUSDT','BCPTETH','BCPTUSDT','PKTBTC','PKTETH','WLKBTC'
+        ,'WLKETH','WLKUSD','EVNBTC','CPGBTC','CPGETH','BPTNBTC','BPTNETH','BPTNUSD'
+        ,'BETRBTC','BETRETH','ARCTBTC','ARCTUSD','DBETBTC','DBETETH','DBETUSD','RNTBETH'
+        ,'HANDETH','HANDUSD','BEZBTC','BEZETH','BEZUSD','ACOETH','CTEBTC','CTEETH'
+        ,'CTEUSD','UTNPBTC','UTNPETH','UTNPUSD','CPYBTC','CPYETH','CHPETH','BCPTBTC'
+        ,'ACTBTC','ACTETH','ACTUSD','HIREETH','ADABTC','ADAETH','ADAUSD','SIGBTC'
+        ,'RPMBTC','RPMETH','MTXBTC','MTXETH','MTXUSD','BGGBTC','BGGETH','BGGUSD'
+        ,'SETHETH','WIZBTC','WIZETH','WIZUSD','DADIBTC','DADIETH','BDGETH','DATXBTC'
+        ,'DATXETH','TRUEBTC','DRGBTC','DRGETH','BANCABTC','BANCAETH','ZAPETH','ZAPUSD'
+        ,'AUTOBTC','NOAHBTC','SOCBTC','WILDBTC','INSURBTC','INSURETH','OCNBTC','OCNETH'
+        ,'STQBTC','STQETH','XLMBTC','XLMETH','XLMUSD','IOTABTC','IOTAETH','IOTAUSD'
+        ,'DRTBTC','MLDBTC','MLDETH','MLDUSD','BETRUSD','CGCETH','ERTBTC','CRPTBTC'
+        ,'CRPTUSD','MESHBTC','MESHETH','MESHUSD','HLWETH','IHTBTC','IHTETH','IHTUSD'
+        ,'SCCBTC','YCCBTC','DANBTC','TELBTC','TELETH','BUBOBTC','BUBOETH','BUBOUSD'
+        ,'VITBTC','VITETH','VITUSD','NCTBTC','NCTETH','NCTUSD','AXPBTC','AXPETH'
+        ,'BMHBTC','BANCAUSD','NOAHETH','NOAHUSD','HQXBTC','LDCBTC','XMOBTC','XMOUSD'
+        ,'XMOETH','BERRYBTC','BERRYETH','BERRYUSD','BSTNBTC','BSTNETH','BSTNUSD','GBXBTC'
+        ,'GBXETH','GBXUSD','SHIPBTC','SHIPETH','NANOBTC','NANOETH','NANOUSD','LNCBTC'
+        ,'UNCBTC','UNCETH','RPXBTC','RPXETH','RPXUSD','KINETH','ARDRUSD','DAXTBTC'
+        ,'DAXTETH','FOTAETH','FOTABTC','SETHBTC','CVTBTC','CVTETH','CVTUSD','STQUSD'
+        ,'GNTBTC','GNTETH','GNTUSD','ADHBTC','ADHETH','BBCBTC','BBCETH','GETBTC'
+        ,'MITHBTC','MITHETH','MITHUSD','SUNCETH','DADIUSD','TKYBTC','ACATBTC','ACATETH'
+        ,'ACATUSD','BTXUSD','TCNBTC','VIOETH','WIKIBTC','WIKIETH','WIKIUSD','ONTBTC'
+        ,'ONTETH','ONTUSD','FTXBTC','FTXETH','FRECBTC','NAVIBTC','FRECETH','FRECUSDT'
+        ,'VMEETH','NAVIETH','BTCPBTC','LNDETH','CSMBTC','NANJBTC','MTCBTC','MTCETH'
+        ,'MTCUSD','NTKBTC','NTKETH','NTKUSD','AUCBTC','AUCETH','CMCTBTC','CMCTETH'
+        ,'CMCTUSD','MANBTC','MANETH','MANUSD','HIREBTC','TKABTC','TKAETH','TKAUSD'
+        ,'PNTBTC','PNTETH','FXTBTC','NEXOBTC','CHXBTC','CHXETH','CHXUSD','PATBTC'
+        ,'PATETH','XMCBTC','EJOYBTC','EJOYETH','EJOYUSD','FXTETH','HEROBTC','HEROETH'
+        ,'XMCETH','XMCUSDT','STAKBTC','STAKETH','FDZBTC','FDZETH','FDZUSD','SPDBTC'
+        ,'SPDETH','LUCBTC','MITXBTC','TIVBTC','B2GBTC','B2GUSD','ZPTBTC','ZPTETH'
+        ,'HBZBTC','FACEBTC','FACEETH','HBZETH','HBZUSD','ZPTUSD','MORPHBTC','MORPHETH'
+        ,'MORPHUSD','EBKCBTC','CPTBTC','PATUSD','HTMLBTC','HTMLETH','MITXETH','JOTBTC'
+        ,'JBCBTC','JBCETH','BTSBTC','BNKBTC','KBCBTC','KBCETH','BNKETH','BNKUSD'
+        ,'TIVETH','TIVUSD','LUCETH','LUCUSD','CSMETH','CSMUSD','INKBTC','IOSTBTC'
+        ,'INKETH','INKUSD','CBCBTC','IOSTUSD','COINBTC','ZILBTC','COINUSD','COINETH'
+        ,'PMNTBTC','ABYSSBTC','ABYSSETH','ZILUSD','BCIBTC','CBCETH','CBCUSD','PITCHBTC'
+        ,'PITCHETH','HTMLUSD','TDSBTC','TDSETH','TDSUSD','SBDETH','SBDUSD','DPNBTC'
+        ,'UUUBTC','UUUETH','XBPBTC','CLNBTC','IVYBTC','IVYETH','TTUBTC','TTUETH'
+        ,'TTUUSD','CLNETH','DORBTC','DORETH','DORUSD','ELECBTC','ELECETH','ELECUSD'
+        ,'QNTUBTC','QNTUETH','QNTUUSD','IPLETH','IPLUSD','CENNZBTC','BTCPETH','BTCPUSD'
+        ,'CENNZETH','SWMBTC','MXMBTC','MXMETH','SPFUSD','KRMUSD','LCCBTC','HGTBTC'
+    ];
     arPair = [];
     pair = '';
     isInvert = false;
@@ -41,11 +144,11 @@ export class HitbtcService {
         const varTwo = `${arPair[1]}${arPair[0]}`.toUpperCase();
         if (pairs.indexOf(varOne) + 1) {
             this.pair = varOne;
-            this.arPair = arPair;
+            this.arPair = arPair.slice();
         } else if (pairs.indexOf(varTwo) + 1) {
             this.isInvert = true;
             this.pair = varTwo;
-            this.arPair = arPair.reverse();
+            this.arPair = arPair.reverse().slice();
         } else {
             this.pair = '';
         }
@@ -146,9 +249,14 @@ export class HitbtcService {
             if (!pair) throw Error('Pair not set!');
             this.get(`public/orderbook/${pair}`, {limit: limit}).then(res => {
                 const response = res['data'];
-                const bids = response['ask'].map(i => [i['price'], i['size'], this.name]);
-                const asks = response['bid'].map(i => [i['price'], i['size'], this.name]);
-                resolve({bids: bids, asks: asks});
+                const lens = (x) => {return {rate: parseFloat(x['price']), amount: parseFloat(x['size']), name: this.name}};
+                const bids = response['bid'].map(lens);
+                const asks = response['ask'].map(lens);
+                resolve({
+                    name: this.name,
+                    bids: bids, asks: asks,
+                    pairFrom: this.arPair[0].toUpperCase(), pairTo: this.arPair[1].toUpperCase()
+                });
             }, err => {
                 reject(err);
             })
@@ -202,19 +310,32 @@ export class HitbtcService {
         });
     }
 
-    orderCreate(quantity, price, type) {
+    orderCreate(order) {
+        if (order.arPair)
+            this.setPair(order.arPair);
         const pair = this.pair;
         if (!pair) throw Error('Pair not set!');
+        const type = (order.type.toUpperCase() === 'SELL' || order.type.toUpperCase() === 'BID') ? 'sell' : 'buy';
         return new Promise((resolve, reject) => {
-            this.post('order', {symbol: pair, quantity: quantity, price: price, side: type, type: 'limit'})
-                .then(
-                    res => {
-                        resolve({order_id: res['data']['clientOrderId']});
-                    },
-                    err => {
-                        reject(err);
-                    })
-                .catch(reject);
+            setTimeout(() => {
+                console.log(`HitBTC order:
+    type: ${type} : ${typeof type}
+    pair: ${pair} : ${typeof pair}
+    amount: ${order.amount} : ${typeof order.amount}
+    rate: ${order.rate} : ${typeof order.rate}`);
+                resolve(Object.assign(order, {order_id: ~~(Math.random() * 10000)}));
+            }, Math.random() * 2000);
+            //TODO UNCOMMENT
+            //TODO ERROR RESOLVING
+            // this.post('order', {symbol: pair, quantity: order.amount, price: order.rate, side: type, type: 'limit'})
+            //     .then(
+            //         res => {
+            //             resolve({order_id: res['data']['clientOrderId']});
+            //         },
+            //         err => {
+            //             reject(err);
+            //         })
+            //     .catch(reject);
         });
     }
 
