@@ -3,7 +3,7 @@ import assert from 'assert';
 import {
     getOrdersToPlace, getOrderFilter,
     Spread, DIGITS,
-    SaveOrder, GetOrder, getPendingOrders
+    SaveOrder, GetOrder, getPendingOrders, saveExternalOrder
 } from '../src/orderManager';
 
 
@@ -364,6 +364,34 @@ describe('Test methods', () => {
                         assert.equal(order.Progress, 'pending');
                     });
                     done();
+                })
+                .catch(console.error);
+        });
+
+        it('Should save external order', (done) => {
+            const orderToSave = {
+                rate: 1.011010,
+                amount: 0.00012,
+                name: 'RandomChange',
+                arPair: ['ETH', 'BTC'],
+                type: 'sell',
+                order_id: ~~(Math.random() * 1000000)
+            };
+
+            saveExternalOrder(orderToSave)
+                .then((res) => {
+                    const id = res.insertId;
+                    assert.notEqual(id, undefined);
+                    const deleteOrderQuery = 'DELETE FROM outer_orders WHERE Id=?';
+                    const db = mysql.createConnection({
+                        host: 'localhost',
+                        user: 'root',
+                        database: 'tbot_db'
+                    });
+                    db.query(deleteOrderQuery, [id], (err, res) => {
+                        if (!err)
+                            done();
+                    });
                 })
                 .catch(console.error);
         });

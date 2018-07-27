@@ -6,6 +6,25 @@ import mysql from 'mysql';
 import {BittrexService} from './xchng/bittrex';
 import {CryptopiaService} from './xchng/cryptopia';
 import {HitbtcService} from './xchng/hitbtc';
+import {getWinnexApiKey, getWinnexMinorDic} from './xchng/winnex';
+import {Log} from './loggerMongo';
+
+const logFiller = (err) => {
+    Log('filler', err)
+};
+
+let MiniorDic = null;
+getWinnexApiKey()
+    .then(getWinnexMinorDic)
+    .then((dictionary) => {
+        MiniorDic = dictionary.reduce((obj, cur) => {
+            obj[cur.Name] = cur['MinorUnit'];
+            return obj
+        }, {});
+    })
+    .catch((error) => {
+        Log('winnex', error);
+    });
 
 export const DIGITS = 12;
 
@@ -23,22 +42,32 @@ const hitbtc = new HitbtcService({
 });
 
 const db = mysql.createConnection({
-    //TODO config
-    host: 'localhost',
-    user: 'root',
-    database: 'tbot_db'
+    host:     process.env.DB_HOST || 'localhost',
+    user:     process.env.DB_USER || 'root',
+    database: process.env.DB_NAME || 'tbot_db'
 });
 
 export const SaveOrder = (order) => {
     const insertOrderQuery = 'INSERT INTO orders (PairFrom, PairTo, Type, Rate, ' +
         'Amount, RateOpen, AmountOpen, Status, Source, Email, OrderId, ' +
-        'OrderType, AmountChange, Total, Progress) VALUES ' +
-        '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'pending\')';
+        'OrderType, AmountChange, Total, OppositeOrderId, Progress) VALUES ' +
+        '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'pending\')';
 
     return new Promise((resolve, reject) => {
+
+        if (!MiniorDic) {
+            reject(new Error('Minor dictionary not defined'));
+        }
+
+        if (!MiniorDic[order.PairTo]) {
+            reject(new Error('Pair doesn\'t defined in minor dictionary'));
+        }
+
+        order.Amount = Number((order.Amount / MiniorDic[order.PairTo]).toFixed(DIGITS));
+
         db.query(insertOrderQuery, [order.PairFrom, order.PairTo, order.Type, order.Rate,
                 order.Amount, order.RateOpen, order.AmountOpen, order.Status, order.Source, order.Email,
-                order.OrderId, order.OrderType, order.AmountChange, order.Total],
+                order.OrderId, order.OrderType, order.AmountChange, order.Total, order.OppositeOrderId],
             (err, result) => {
                 if (err)
                     reject(err);
@@ -58,7 +87,6 @@ export const GetOrder = (id, fields = '*') => {
     });
 };
 
-//TODO уточнить у биржи формат
 const reverseTypes = {
     BUY: 'SELL',
     SELL: 'BUY',
@@ -100,10 +128,11 @@ export const Spread = (amount, orders) => {
 };
 
 export const getOrdersToPlace = (order, orders, filter) => {
+    console.log(orders.length);
     orders = orders.filter(filter.RateFilter).sort(filter.RateSorter);
 
     if (!orders.length) {
-        //TODO log
+        Log('orderMismatch', order);
         return [];
     }
 
@@ -111,16 +140,13 @@ export const getOrdersToPlace = (order, orders, filter) => {
 };
 
 const createOrder = (order) => {
-    //TODO register order in DB
-    //TODO Watch registered order
-    //TODO sukablyad
     // return new Promise((resolve, reject) => {
     //     setTimeout(() => {
     //         console.log(order);
     //         resolve(`Order: ${type}, ${Number(order.amount.toFixed(6))}, ${order.rate}, ${order.name}`);
     //     }, Math.random() * 1000 + 1000);
     // });
-    //TODO sdelat' krasivo
+    Log('ordersToCreate', order);
     switch (order.name) {
         case 'Bittrex':
             return bittrex.orderCreate(order);
@@ -161,20 +187,105 @@ const processPendingOrders = () => {
         .then((orders) => {
             orders.forEach((order) => {
                 const filter = getOrderFilter(order);
+                console.log(order.PairFrom + order.PairTo);
                 const ordersToPlace = getOrdersToPlace(order, OrderProvider.Orders[order.PairFrom + order.PairTo][order.Type], filter);
                 ordersToPlace.forEach((orderToPlace) => {
                     orderToPlace.arPair = [order.PairFrom, order.PairTo];
                     orderToPlace.type = order.Type;
-                    createOrder(orderToPlace) //TODO true param
-                        .then(saveExternalOrder);
+                    createOrder(orderToPlace)
+                        .then(saveExternalOrder)
+                        .catch((err) => {
+                            Log('orderCreation', err)
+                        });
                 });
             });
         })
-        .catch(console.error); // TODO log
+        .catch((err) => {
+            Log('orderMatching', {error: err.toString()});
+        });
 };
 
-const saveExternalOrder = (order) => {
-    console.log('Save order id:', order.order_id); //TODO save
+export const saveExternalOrder = (order) => {
+    const saveOrderQuery = 'INSERT INTO outer_orders (Name, Type, PairFrom, ' +
+        'PairTo, Amount, Rate, OrderId) VALUES (?, ?, ?, ?, ?, ?, ?)';
+
+    return new Promise((resolve, reject) => {
+        db.query(saveOrderQuery, [order.name, order.type, order.arPair[0],
+            order.arPair[1], order.amount, order.rate, order.order_id], (err, res) => {
+            if (err)
+                reject(err);
+            resolve(res);
+        });
+    });
 };
 
-setInterval(processPendingOrders, 1000);
+const getExternalOpenedOrders = () => {
+    const getOpenedOrdersQuery =
+        'SELECT * FROM outer_orders WHERE Status = \'opened\'';
+
+    return new Promise((resolve, reject) => {
+        db.query(getOpenedOrdersQuery, (err, orders) => {
+            if (err)
+                reject(err);
+            resolve(orders);
+        });
+    });
+};
+
+const setClosedExternalOrders = () => {
+    getExternalOpenedOrders()
+        .then((orders) => {
+            orders.forEach((order) => {
+                let getOrderPromise;
+                switch (order.Name) {
+                    case 'Bittrex':
+                        getOrderPromise = bittrex.getOrder(order.OrderId)
+                            .then((res) => {
+                                return res.success && !res.data.isOpen;
+                            });
+                        break;
+                    case 'Cryptopia': //TODO Криптопия дно ебаное нельзя получить свой ордер
+                        getOrderPromise = new Promise(resolve => {resolve(true)});
+                        break;
+                    case 'HitBTC':
+                        getOrderPromise = hitbtc.getOrder(order.OrderId)
+                            .then((res) => {
+                                return res && (res.status !== 'new' || res.status !== 'partiallyFilled');
+                            });
+                        break;
+                }
+                getOrderPromise
+                    .then((isClosed) => {
+                        if (isClosed)
+                            setOrderClosed(order.OrderId)
+                                .catch((err) => {
+                                    Log('orderClosing', err);
+                                });
+                    })
+                    .catch((err) => {
+                        Log('getOrder', err);
+                    });
+            });
+        })
+        .catch((err) => {
+            Log('orderDbGet', err);
+        });
+};
+
+const setOrderClosed = (orderId) => {
+    const setClosedQuery = 'UPDATE outer_orders SET Status = \'closed\' WHERE id = ?';
+    return new Promise((resolve, reject) => {
+        db.query(setClosedQuery, orderId, (err, res) => {
+            if (err)
+                reject(err);
+            resolve(res);
+        })
+    });
+};
+
+const watchExternalOrders = () => {
+
+};
+
+setInterval(processPendingOrders, 1e3);
+setInterval(setClosedExternalOrders, 5 * 1e3);

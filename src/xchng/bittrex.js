@@ -210,20 +210,20 @@ export class BittrexService {
             if (!pair) throw Error('Pair not set!');
             const type_url = (order.type.toUpperCase() === 'SELL' || order.type.toUpperCase() === 'BID') ? 'selllimit' : 'buylimit';
 
-            setTimeout(() => {
-                console.log(`Bittrex order:
-    type: ${type_url} : ${typeof type_url}
-    pair: ${pair} : ${typeof pair}
-    amount: ${order.amount} : ${typeof order.amount}
-    rate: ${order.rate} : ${typeof order.rate}`);
-                resolve(Object.assign(order, {order_id: ~~(Math.random() * 10000)}));
-            }, Math.random() * 2000);
+    //         setTimeout(() => {
+    //             console.log(`Bittrex order:
+    // type: ${type_url} : ${typeof type_url}
+    // pair: ${pair} : ${typeof pair}
+    // amount: ${order.amount} : ${typeof order.amount}
+    // rate: ${order.rate} : ${typeof order.rate}`);
+    //             resolve(Object.assign(order, {order_id: ~~(Math.random() * 1000000)}));
+    //         }, Math.random() * 2000);
             //TODO UNCOMMENT
             //TODO ERROR RESOLVING
-            // this.get(`market/${type_url}`, {market: pair, quantity: order.amount, rate: order.rate}).then(
-            //     res => {
-            //         resolve(Object.assign(order, {order_id: res['data']['uuid']}));
-            //     }, err => reject(err));
+            this.get(`market/${type_url}`, {market: pair, quantity: order.amount, rate: order.rate}).then(
+                res => {
+                    resolve(Object.assign(order, {order_id: res['data']['uuid']}));
+                }, err => reject(err));
         });
     }
 

@@ -1,25 +1,76 @@
 import {BittrexService} from './xchng/bittrex';
 import {HitbtcService} from './xchng/hitbtc';
 import {CryptopiaService} from './xchng/cryptopia';
+import {Log} from './loggerMongo';
 
 let exchanges = [];
+
+const logFiller = (err) => {
+    Log('filler', err)
+};
 
 export let OrderProvider = {
     Orders: {},
     Start: () => {
         setInterval(() => {
-            const promises = exchanges.map((ex) => {
-                return ex.getOrders(20); // TODO config
+            exchanges.forEach((ex) => {
+                ex.getOrders(20)
+                    .then(saveOrders)
+                    .catch(logFiller);
             });
-            Promise.all(promises)
-                .then(saveOrders)
-                .catch(console.error);
         }, 1000);
     }
 };
 
 const pairs = [
-    ['eth', 'btc']
+    ['ada', 'usd'],
+    ['ada', 'btc'],
+    ['ada', 'eth'],
+    ['btc', 'usd'],
+    ['btg', 'usd'],
+    ['btg', 'btc'],
+    ['btg', 'eth'],
+    ['dash', 'usd'],
+    ['dash', 'btc'],
+    ['dash', 'eth'],
+    ['dcr', 'btc'],
+    ['emc2', 'btc'],
+    ['etc', 'usd'],
+    ['etc', 'btc'],
+    ['etc', 'eth'],
+    ['eth', 'usd'],
+    ['eth', 'btc'],
+    ['ftc', 'btc'],
+    ['game', 'btc'],
+    ['grs', 'btc'],
+    ['lbc', 'btc'],
+    ['ltc', 'usd'],
+    ['ltc', 'btc'],
+    ['ltc', 'eth'],
+    ['mona', 'btc'],
+    ['neo', 'usd'],
+    ['neo', 'btc'],
+    ['neo', 'eth'],
+    ['omg', 'usd'],
+    ['omg', 'btc'],
+    ['omg', 'eth'],
+    ['sc', 'eth'],
+    ['trx', 'eth'],
+    ['trx', 'btc'],
+    ['trx', 'usd'],
+    ['ubq', 'btc'],
+    ['via', 'btc'],
+    ['xmr', 'usd'],
+    ['xmr', 'btc'],
+    ['xmr', 'eth'],
+    ['xrp', 'usd'],
+    ['xrp', 'btc'],
+    ['xrp', 'eth'],
+    ['zcl', 'btc'],
+    ['zec', 'usd'],
+    ['zec', 'btc'],
+    ['zec', 'eth'],
+    ['zen', 'btc'],
 ];
 
 pairs.forEach((pair) => {
@@ -44,31 +95,11 @@ pairs.forEach((pair) => {
     }
 });
 
-const mapOrders = (orders) => {
-    if (!orders.length)
-        return [];
-
-    const pair = orders[0].pairFrom + orders[0].pairTo;
-    let bids = [];
-    let asks = [];
-
-    orders.forEach((order) => {
-        bids = bids.concat(order.bids);
-        asks = asks.concat(order.asks);
-    });
-
-    return {
-        pair: pair,
-        bids: bids,
-        asks: asks
-    }
-};
-
 const saveOrders = (orders) => {
-    const mappedOrders = mapOrders(orders);
-    if (!OrderProvider.Orders[mappedOrders.pair])
-        OrderProvider.Orders[mappedOrders.pair] = {};
+    const pair = orders.pairFrom + orders.pairTo;
+    if (!OrderProvider.Orders[pair])
+        OrderProvider.Orders[pair] = {};
 
-    OrderProvider.Orders[mappedOrders.pair].BID = mappedOrders.bids;
-    OrderProvider.Orders[mappedOrders.pair].ASK = mappedOrders.asks;
+    OrderProvider.Orders[pair].BID = orders.bids;
+    OrderProvider.Orders[pair].ASK = orders.asks;
 };

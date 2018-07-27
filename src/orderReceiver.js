@@ -1,4 +1,5 @@
 import {SaveOrder} from './orderManager';
+import {Log} from './loggerMongo';
 
 const http = require('http');
 
@@ -13,7 +14,9 @@ const server = http.createServer((req, res) => {
         try {
             const order = JSON.parse(body);
             SaveOrder(order);
-        } catch (e) {}
+        } catch (e) {
+            Log('receive', {message: e.toString()});
+        }
     });
     res.end('ok');
 });

@@ -170,7 +170,8 @@ export class HitbtcService {
                 url: url,
                 body: data,
                 headers: {
-                    'Authorization': 'Basic ' + Buffer.from(`${this.config.apiKey}:${this.config.apiSecret}`).toString('base64')
+                    'Authorization': 'Basic ' + Buffer.from(`${this.config.apiKey}:${this.config.apiSecret}`).toString('base64'),
+                    'Connection': 'Keep-Alive'
                 },
                 json: true
             };
@@ -194,8 +195,6 @@ export class HitbtcService {
                         errorCode: err.code,
                         exchange: this.name
                     };
-
-                    console.error(error);
                     reject(error);
                 }
                 else {
@@ -206,7 +205,6 @@ export class HitbtcService {
                         exchange: this.name
                     };
 
-                    console.error(error);
                     reject(error);
                 }
             });
@@ -236,7 +234,6 @@ export class HitbtcService {
 
                 resolve(data);
             }, err => {
-                console.error(err);
                 resolve(null);
             })
                 .catch(reject);
@@ -317,25 +314,25 @@ export class HitbtcService {
         if (!pair) throw Error('Pair not set!');
         const type = (order.type.toUpperCase() === 'SELL' || order.type.toUpperCase() === 'BID') ? 'sell' : 'buy';
         return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                console.log(`HitBTC order:
-    type: ${type} : ${typeof type}
-    pair: ${pair} : ${typeof pair}
-    amount: ${order.amount} : ${typeof order.amount}
-    rate: ${order.rate} : ${typeof order.rate}`);
-                resolve(Object.assign(order, {order_id: ~~(Math.random() * 10000)}));
-            }, Math.random() * 2000);
+    //         setTimeout(() => {
+    //             console.log(`HitBTC order:
+    // type: ${type} : ${typeof type}
+    // pair: ${pair} : ${typeof pair}
+    // amount: ${order.amount} : ${typeof order.amount}
+    // rate: ${order.rate} : ${typeof order.rate}`);
+    //             resolve(Object.assign(order, {order_id: ~~(Math.random() * 1000000)}));
+    //         }, Math.random() * 2000);
             //TODO UNCOMMENT
             //TODO ERROR RESOLVING
-            // this.post('order', {symbol: pair, quantity: order.amount, price: order.rate, side: type, type: 'limit'})
-            //     .then(
-            //         res => {
-            //             resolve({order_id: res['data']['clientOrderId']});
-            //         },
-            //         err => {
-            //             reject(err);
-            //         })
-            //     .catch(reject);
+            this.post('order', {symbol: pair, quantity: order.amount.toString(), price: order.rate.toString(), side: type, type: 'limit'})
+                .then(
+                    res => {
+                        resolve(Object.assign(order, {order_id: res['data']['clientOrderId']}));
+                    },
+                    err => {
+                        reject(err);
+                    })
+                .catch(reject);
         });
     }
 

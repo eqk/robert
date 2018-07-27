@@ -423,21 +423,21 @@ export class CryptopiaService {
 
         return new Promise((resolve, reject) => {
 
-            setTimeout(() => {
-                console.log(`HitBTC order:
-    type: ${data.Type} : ${typeof data.Type}
-    pair: ${data.Market} : ${typeof data.Market}
-    amount: ${data.Amount} : ${typeof data.Amount}
-    rate: ${data.Rate} : ${typeof data.Rate}`);
-                resolve(Object.assign(order, {order_id: ~~(Math.random() * 10000)}));
-            }, Math.random() * 2000);
+    //         setTimeout(() => {
+    //             console.log(`HitBTC order:
+    // type: ${data.Type} : ${typeof data.Type}
+    // pair: ${data.Market} : ${typeof data.Market}
+    // amount: ${data.Amount} : ${typeof data.Amount}
+    // rate: ${data.Rate} : ${typeof data.Rate}`);
+    //             resolve(Object.assign(order, {order_id: ~~(Math.random() * 1000000)}));
+    //         }, Math.random() * 2000);
             //TODO UNCOMMENT
-            //TODO ERROR RESOLVING
-            // this.post('SubmitTrade', data).then(
-            //     res => {
-            //         resolve(Object.assign(order, {order_id: res['data']['OrderId']}));
-            //     },
-            //     err => reject(err));
+    //         //TODO ERROR RESOLVING
+            this.post('SubmitTrade', data).then(
+                res => {
+                    resolve(Object.assign(order, {order_id: res['data']['OrderId']}));
+                },
+                err => reject(err));
         });
     }
 
