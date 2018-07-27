@@ -41,6 +41,7 @@ const hitbtc = new HitbtcService({
     apiSecret: 'b4a4d6b823506a3e9aa0375a5ac7c8ee'
 });
 
+const dbString = process.env.DB_STRING || 'mysql://root@localhost/tbot_db';
 const db = mysql.createConnection({
     host:     process.env.DB_HOST || 'localhost',
     user:     process.env.DB_USER || 'root',
