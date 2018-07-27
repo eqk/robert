@@ -42,11 +42,7 @@ const hitbtc = new HitbtcService({
 });
 
 const dbString = process.env.DB_STRING || 'mysql://root@localhost/tbot_db';
-const db = mysql.createConnection({
-    host:     process.env.DB_HOST || 'localhost',
-    user:     process.env.DB_USER || 'root',
-    database: process.env.DB_NAME || 'tbot_db'
-});
+const db = mysql.createConnection(dbString);
 
 export const SaveOrder = (order) => {
     const insertOrderQuery = 'INSERT INTO orders (PairFrom, PairTo, Type, Rate, ' +
