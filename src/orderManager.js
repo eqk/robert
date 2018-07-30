@@ -60,10 +60,10 @@ export const SaveOrder = (order) => {
             reject(new Error('Pair doesn\'t defined in minor dictionary'));
         }
 
-        order.Amount = Number((order.Amount / MiniorDic[order.PairTo]).toFixed(DIGITS));
+        order.AmountChange = Number((order.AmountChange / MiniorDic[order.PairTo]).toFixed(DIGITS));
 
         db.query(insertOrderQuery, [order.PairFrom, order.PairTo, order.Type, order.Rate,
-                order.Amount, order.RateOpen, order.AmountOpen, order.Status, order.Source, order.Email,
+                order.AmountChange, order.RateOpen, order.AmountOpen, order.Status, "source", order.Email,
                 order.OrderId, order.OrderType, order.AmountChange, order.Total, order.OppositeOrderId],
             (err, result) => {
                 if (err)

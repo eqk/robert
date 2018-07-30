@@ -11,14 +11,24 @@ const server = http.createServer((req, res) => {
     req.on('data', (chunk) => {
         body += chunk;
     }).on('end', () => {
+        Log('requests', {received_at: new Date(), body: body});
         try {
             const order = JSON.parse(body);
-            SaveOrder(order);
+            SaveOrder(order)
+                .then(() => {
+                    res.end('ok');
+                })
+                .catch((err) => {
+                    res.statusCode = 500;
+                    res.end();
+                    Log('receive', {message: err.toString()});
+                });
         } catch (e) {
+            res.statusCode = 500;
+            res.end();
             Log('receive', {message: e.toString()});
         }
     });
-    res.end('ok');
 });
 
 server.listen(port, () => {
