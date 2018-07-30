@@ -73,11 +73,27 @@ const pairs = [
     ['zen', 'btc'],
 ];
 
-pairs.forEach((pair) => {
+export const Proxy = {
+    _proxies: [
+        'http://PQFyXM:SEMRnV@196.19.9.9:8000',
+        'http://PQFyXM:SEMRnV@196.19.10.135:8000',
+        undefined
+    ],
 
-    const bittrex = new BittrexService();
-    const hitbtc = new HitbtcService();
-    const cryptopia = new CryptopiaService();
+    randomProxy: function() {
+        const ind = Math.floor(Math.random() * (this._proxies.length));
+        return this._proxies[ind];
+    }
+};
+
+pairs.forEach((pair) => {
+    const conf = {
+        proxy: Proxy.randomProxy()
+    };
+
+    const bittrex = new BittrexService(conf);
+    const hitbtc = new HitbtcService(conf);
+    const cryptopia = new CryptopiaService(conf);
 
     if (bittrex.isAvailable(pair)) {
         bittrex.setPair(pair);
