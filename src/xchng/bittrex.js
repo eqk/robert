@@ -67,6 +67,9 @@ export class BittrexService {
     }
 
     isAvailable(arPair) {
+        arPair = arPair.slice();
+        arPair = arPair.map((par) => par === 'usd' ? 'usdt' : par);
+
         const pairs = this.pairs;
         const varOne = `${arPair[0]}-${arPair[1]}`.toUpperCase();
         const varTwo = `${arPair[1]}-${arPair[0]}`.toUpperCase();
@@ -74,6 +77,9 @@ export class BittrexService {
     }
 
     setPair(arPair = ['btc', 'usd']) {
+        arPair = arPair.slice();
+        arPair = arPair.map((par) => par === 'usd' ? 'usdt' : par);
+
         const pairs = this.pairs;
         const varOne = `${arPair[0]}-${arPair[1]}`.toUpperCase();
         const varTwo = `${arPair[1]}-${arPair[0]}`.toUpperCase();
@@ -204,23 +210,22 @@ export class BittrexService {
 
     orderCreate(order) {
         return new Promise((resolve, reject) => {
-            if (order.arPair)
-                this.setPair(order.arPair);
+            this.setPair([order.PairFrom, order.PairTo]);
             const pair = this.pair;
             if (!pair) throw Error('Pair not set!');
-            const type_url = (order.type.toUpperCase() === 'SELL' || order.type.toUpperCase() === 'BID') ? 'selllimit' : 'buylimit';
+            const type_url = (order.Type.toUpperCase() === 'SELL' || order.Type.toUpperCase() === 'BID') ? 'selllimit' : 'buylimit';
 
     //         setTimeout(() => {
     //             console.log(`Bittrex order:
     // type: ${type_url} : ${typeof type_url}
     // pair: ${pair} : ${typeof pair}
-    // amount: ${order.amount} : ${typeof order.amount}
-    // rate: ${order.rate} : ${typeof order.rate}`);
+            // amount: ${order.Amount} : ${typeof order.Amount}
+            // rate: ${order.Rate} : ${typeof order.Rate}`);
     //             resolve(Object.assign(order, {order_id: ~~(Math.random() * 1000000)}));
     //         }, Math.random() * 2000);
             //TODO UNCOMMENT
             //TODO ERROR RESOLVING
-            this.get(`market/${type_url}`, {market: pair, quantity: order.amount, rate: order.rate}).then(
+            this.get(`market/${type_url}`, {market: pair, quantity: order.Amount, rate: order.Rate}).then(
                 res => {
                     resolve(Object.assign(order, {order_id: res['data']['uuid']}));
                 }, err => reject(err));

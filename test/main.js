@@ -3,8 +3,9 @@ import assert from 'assert';
 import {
     getOrdersToPlace, getOrderFilter,
     Spread, DIGITS,
-    SaveOrder, GetOrder, getPendingOrders, saveExternalOrder
+    SaveOrder, GetOrder, getPendingOrders, saveExternalOrder, InitMinorDic, MinreqDic, InitMinreqDic, addMiniOrders
 } from '../src/orderManager';
+import {getWinnexApiKey} from '../src/xchng/winnex';
 
 
 const c1_Orders = {
@@ -306,55 +307,63 @@ describe('Test methods', () => {
         it('Should save order to DB', (done) => {
             const order = {
                 Type: 'ASK',
-                Amount: 0.5,
+                Amount: 20000000000000000,
+                AmountChange: 200000000000000000,
                 Rate: '6500',
                 PairFrom: 'BTC',
-                PairTo: 'USD',
+                PairTo: 'ETH',
                 RateOpen: '0.00012',
                 AmountOpen: '0.120210',
                 Status: 'Opened',
                 Source: 'Winnex',
                 Email: 'cock@cock.cock',
                 OrderId: ~~(Math.random() * 10000),
+                OppositeOrderId: ~~(Math.random() * 10000),
                 OrderType: 'Limit',
-                AmountChange: '0.012',
                 Total: '3250'
             };
 
-            SaveOrder(order)
-                .then((res) => {
-                    const id = res.insertId;
-                    GetOrder(id)
-                        .then((orderFromDb) => {
-                            assert.equal(order.Amount, orderFromDb.Amount);
-                            assert.equal(order.Type, orderFromDb.Type);
-                            assert.equal(order.Rate, orderFromDb.Rate);
-                            assert.equal(order.PairFrom, orderFromDb.PairFrom);
-                            assert.equal(order.PairTo, orderFromDb.PairTo);
-                            assert.equal(order.RateOpen, orderFromDb.RateOpen);
-                            assert.equal(order.AmountOpen, orderFromDb.AmountOpen);
-                            assert.equal(order.Status, orderFromDb.Status);
-                            assert.equal(order.Source, orderFromDb.Source);
-                            assert.equal(order.Email, orderFromDb.Email);
-                            assert.equal(order.OrderId, orderFromDb.OrderId);
-                            assert.equal(order.OrderType, orderFromDb.OrderType);
-                            assert.equal(order.Total, orderFromDb.Total);
+            InitMinorDic
+                .then(() => {
+                    InitMinreqDic
+                        .then(() => {
+                            SaveOrder(order)
+                                .then((res) => {
+                                    const id = res.insertId;
+                                    GetOrder(id)
+                                        .then((orderFromDb) => {
+                                            // assert.equal(order.Amount, orderFromDb.Amount);
+                                            assert.equal(order.Type, orderFromDb.Type);
+                                            assert.equal(order.Rate, orderFromDb.Rate);
+                                            assert.equal(order.PairFrom, orderFromDb.PairFrom);
+                                            assert.equal(order.PairTo, orderFromDb.PairTo);
+                                            assert.equal(order.RateOpen, orderFromDb.RateOpen);
+                                            assert.equal(order.AmountOpen, orderFromDb.AmountOpen);
+                                            assert.equal(order.Status, orderFromDb.Status);
+                                            // assert.equal(order.Source, orderFromDb.Source);
+                                            assert.equal(order.Email, orderFromDb.Email);
+                                            assert.equal(order.OrderId, orderFromDb.OrderId);
+                                            assert.equal(order.OrderType, orderFromDb.OrderType);
+                                            assert.equal(order.Total, orderFromDb.Total);
 
-                            const deleteOrderQuery = 'DELETE FROM orders WHERE Id=?';
-                            const db = mysql.createConnection({
-                                //TODO config
-                                host: 'localhost',
-                                user: 'root',
-                                database: 'tbot_db'
-                            });
-                            db.query(deleteOrderQuery, [id], (err, res) => {
-                                done();
-                            });
-                        })
-                        .catch(console.error);
-                })
-                .catch(console.error);
+                                            const deleteOrderQuery = 'DELETE FROM orders WHERE Id=?';
+                                            const db = mysql.createConnection({
+                                                //TODO config
+                                                host: 'localhost',
+                                                user: 'root',
+                                                database: 'tbot_db'
+                                            });
+                                            db.query(deleteOrderQuery, [id], (err, res) => {
+                                                done();
+                                            });
+                                        })
+                                        .catch(console.error);
+                                })
+                                .catch(console.error);
 
+                        });
+
+                });
         });
 
         it('Should retrieve pending orders', (done) => {
@@ -394,6 +403,55 @@ describe('Test methods', () => {
                     });
                 })
                 .catch(console.error);
+        });
+
+        it('Should add mini orders', (done) => {
+            const order1 = ['BTC', 'USD', 'BID', 0.04, 0.244, 'rateopen', 'amountopen', 'status', 'sourse', 'email', ~~(Math.random() * 1000000), ~~(Math.random() * 1000000), 'limit', 'amountchange', 'total', 'pending'];
+            const order2 = ['BTC', 'ASD', 'BID', 0.03, 0.1345, 'rateopen', 'amountopen', 'status', 'sourse', 'email', ~~(Math.random() * 1000000), ~~(Math.random() * 1000000), 'limit', 'amountchange', 'total', 'pending'];
+            const order3 = ['BTC', 'USD', 'BID', 0.05, 0.5782, 'rateopen', 'amountopen', 'status', 'sourse', 'email', ~~(Math.random() * 1000000), ~~(Math.random() * 1000000), 'limit', 'amountchange', 'total', 'pending'];
+            const order4 = ['BTC', 'USD', 'ASK', 0.02, 0.463, 'rateopen', 'amountopen', 'status', 'sourse', 'email', ~~(Math.random() * 1000000), ~~(Math.random() * 1000000), 'limit', 'amountchange', 'total', 'pending'];
+            const order5 = ['BTC', 'USD', 'BID', 0.02, 0.5664, 'rateopen', 'amountopen', 'status', 'sourse', 'email', ~~(Math.random() * 1000000), ~~(Math.random() * 1000000), 'limit', 'amountchange', 'total', 'pending'];
+            const order6 = ['BTC', 'USD', 'BID', 0.02, 0.3223, 'rateopen', 'amountopen', 'status', 'sourse', 'email', ~~(Math.random() * 1000000), ~~(Math.random() * 1000000), 'limit', 'amountchange', 'total', 'pending'];
+            const order7 = ['BTC', 'USD', 'BID', 0.02, 0.67, 'rateopen', 'amountopen', 'status', 'sourse', 'email', ~~(Math.random() * 1000000), ~~(Math.random() * 1000000), 'limit', 'amountchange', 'total', 'pending'];
+            const order8 = ['BTC', 'USD', 'BID', 0.02, 0.2, 'rateopen', 'amountopen', 'status', 'sourse', 'email', ~~(Math.random() * 1000000), ~~(Math.random() * 1000000), 'limit', 'amountchange', 'total', 'pending'];
+            const order9 = ['BTC', 'USD', 'BID', 0.02, 0.56, 'rateopen', 'amountopen', 'status', 'sourse', 'email', ~~(Math.random() * 1000000), ~~(Math.random() * 1000000), 'limit', 'amountchange', 'total', 'pending'];
+            const order10 = ['BTC', 'USD', 'BID', 0.02, 0.55, 'rateopen', 'amountopen', 'status', 'sourse', 'email', ~~(Math.random() * 1000000), ~~(Math.random() * 1000000), 'limit', 'amountchange', 'total', 'pending'];
+            const order11 = ['BTC', 'USD', 'BID', 0.02, 1.2, 'rateopen', 'amountopen', 'status', 'sourse', 'email', ~~(Math.random() * 1000000), ~~(Math.random() * 1000000), 'limit', 'amountchange', 'total', 'pending'];
+
+            const db = mysql.createConnection({
+                host: 'localhost',
+                user: 'root',
+                database: 'tbot_db'
+            });
+
+            const query = 'INSERT INTO orders (PairFrom, PairTo, Type, Rate, Amount, RateOpen, AmountOpen, Status, Source, Email, OrderId, OppositeOrderId, OrderType, AmountChange, Total, Progress) VALUE ' +
+                '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            const query1 = 'INSERT INTO mini_orders (PairFrom, PairTo, Type, Rate, Amount, RateOpen, AmountOpen, Status, Source, Email, OrderId, OppositeOrderId, OrderType, AmountChange, Total, Progress) VALUE ' +
+                '(?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?,?, ?, ?, ?)';
+
+            db.query(query, order1, (err, res) => {
+                if (err)
+                    throw err;
+                else {
+                    const id = res.insertId;
+                    const orders = [order2, order3, order4, order5, order6, order7, order8, order9, order10];
+                    orders.forEach((order) => {
+                        db.query(query1, order, (err, res) => {
+
+                        });
+                    });
+                    setTimeout(() => {
+                        GetOrder(id)
+                            .then((order) => {
+                                addMiniOrders(order)
+                                    .then(() => {
+                                        done();
+                                    });
+                            })
+                            .catch(console.error);
+                    }, 500);
+                }
+            });
         });
     });
 });

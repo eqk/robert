@@ -1,6 +1,6 @@
 import {BittrexService} from './xchng/bittrex';
-import {HitbtcService} from './xchng/hitbtc';
-import {CryptopiaService} from './xchng/cryptopia';
+// import {HitbtcService} from './xchng/hitbtc';
+// import {CryptopiaService} from './xchng/cryptopia';
 import {Log} from './loggerMongo';
 
 let exchanges = [];
@@ -15,6 +15,10 @@ export let OrderProvider = {
         setInterval(() => {
             exchanges.forEach((ex) => {
                 ex.getOrders(20)
+                    .then((orders) => {
+                        console.log(Object.keys(OrderProvider.Orders));
+                        return orders;
+                    })
                     .then(saveOrders)
                     .catch(logFiller);
             });
@@ -92,24 +96,26 @@ pairs.forEach((pair) => {
     };
 
     const bittrex = new BittrexService(conf);
-    const hitbtc = new HitbtcService(conf);
-    const cryptopia = new CryptopiaService(conf);
+    // const hitbtc = new HitbtcService(conf);
+    // const cryptopia = new CryptopiaService(conf);
 
     if (bittrex.isAvailable(pair)) {
+        // console.log(pair);
         bittrex.setPair(pair);
         exchanges.push(bittrex);
     }
 
-    if (hitbtc.isAvailable(pair)) {
-        hitbtc.setPair(pair);
-        exchanges.push(hitbtc);
-    }
-
-    if (cryptopia.isAvailable(pair)) {
-        cryptopia.setPair(pair);
-        exchanges.push(cryptopia);
-    }
+    // if (hitbtc.isAvailable(pair)) {
+    //     hitbtc.setPair(pair);
+    //     exchanges.push(hitbtc);
+    // }
+    //
+    // if (cryptopia.isAvailable(pair)) {
+    //     cryptopia.setPair(pair);
+    //     exchanges.push(cryptopia);
+    // }
 });
+
 
 const saveOrders = (orders) => {
     const pair = orders.pairFrom + orders.pairTo;

@@ -1,7 +1,4 @@
 import {OrderProvider} from './orderFiller';
-
-OrderProvider.Start();
-
 import mysql from 'mysql';
 import {BittrexService} from './xchng/bittrex';
 import {CryptopiaService} from './xchng/cryptopia';
@@ -9,22 +6,27 @@ import {HitbtcService} from './xchng/hitbtc';
 import {getWinnexApiKey, getWinnexMinorDic} from './xchng/winnex';
 import {Log} from './loggerMongo';
 
+// OrderProvider.Start();
+
 const logFiller = (err) => {
-    Log('filler', err)
+    Log('filler', err);
 };
 
 let MiniorDic = null;
-getWinnexApiKey()
-    .then(getWinnexMinorDic)
-    .then((dictionary) => {
-        MiniorDic = dictionary.reduce((obj, cur) => {
-            obj[cur.Name] = cur['MinorUnit'];
-            return obj
-        }, {});
-    })
-    .catch((error) => {
-        Log('winnex', error);
-    });
+export const InitMinorDic =
+    getWinnexApiKey()
+        .then(getWinnexMinorDic)
+        .then((dictionary) => {
+            MiniorDic = dictionary.reduce((obj, cur) => {
+                obj[cur.Name] = cur['MinorUnit'];
+                return obj;
+            }, {});
+            console.log('Minor dictionary initialized, length:', Object.keys(MiniorDic).length);
+        })
+        .catch((error) => {
+            Log('winnex', error);
+        });
+
 
 export const DIGITS = 12;
 
@@ -41,29 +43,70 @@ const hitbtc = new HitbtcService({
     apiSecret: 'b4a4d6b823506a3e9aa0375a5ac7c8ee'
 });
 
+export let MinreqDic = null;
+export let InitMinreqDic = bittrex.get('public/getmarkets')
+    .then((markets) => {
+        if (markets.success && markets.data && Array.isArray(markets.data)) {
+            MinreqDic = markets.data.reduce((agr, cur) => {
+                agr[cur.BaseCurrency + cur.MarketCurrency] =
+                    cur.MinTradeSize;
+                return agr;
+            }, {});
+            console.log('Minimum requirements dictionary initialized, length:', Object.keys(MinreqDic).length);
+        }
+        return markets;
+    })
+    .catch((err) => {
+        Log('mindic', {err: err.toString()});
+    });
+
 const dbString = process.env.DB_STRING || 'mysql://root@localhost/tbot_db';
 const db = mysql.createConnection(dbString);
 
 export const SaveOrder = (order) => {
-    const insertOrderQuery = 'INSERT INTO orders (PairFrom, PairTo, Type, Rate, ' +
-        'Amount, RateOpen, AmountOpen, Status, Source, Email, OrderId, ' +
-        'OrderType, AmountChange, Total, OppositeOrderId, Progress) VALUES ' +
-        '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'pending\')';
-
     return new Promise((resolve, reject) => {
 
         if (!MiniorDic) {
             reject(new Error('Minor dictionary not defined'));
+            return;
         }
 
         if (!MiniorDic[order.PairTo]) {
             reject(new Error('Pair doesn\'t defined in minor dictionary'));
+            return;
+        }
+
+        if (!MinreqDic) {
+            reject(new Error('Minimum dictionary not defined'));
+            return;
+        }
+
+        if (!MinreqDic[order.PairFrom + order.PairTo]) {
+            reject(new Error('Pair doesn\'t defined in Minimum dictionary'));
+            return;
         }
 
         order.AmountChange = Number((order.AmountChange / MiniorDic[order.PairTo]).toFixed(DIGITS));
 
+        const minimum = MinreqDic[order.PairFrom + order.PairTo];
+
+        // console.log('amount', order.AmountChange);
+        // console.log('minimum', minimum);
+        // console.log('to big table', order.AmountChange >= minimum);
+
+        let table = 'orders';
+        if (order.AmountChange < minimum)
+            table = 'mini_orders';
+        if (order.PairFrom.toUpperCase() === 'BTC' && (order.AmountChange * order.Rate < 0.0005))
+            table = 'mini_orders';
+
+        const insertOrderQuery = 'INSERT INTO ' + table + ' (PairFrom, PairTo, Type, Rate, ' +
+            'Amount, RateOpen, AmountOpen, Status, Source, Email, OrderId, ' +
+            'OrderType, AmountChange, Total, OppositeOrderId, Progress) VALUES ' +
+            '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'pending\')';
+
         db.query(insertOrderQuery, [order.PairFrom, order.PairTo, order.Type, order.Rate,
-                order.AmountChange, order.RateOpen, order.AmountOpen, order.Status, "source", order.Email,
+                order.AmountChange, order.RateOpen, order.AmountOpen, order.Status, 'source', order.Email,
                 order.OrderId, order.OrderType, order.AmountChange, order.Total, order.OppositeOrderId],
             (err, result) => {
                 if (err)
@@ -144,14 +187,11 @@ const createOrder = (order) => {
     //     }, Math.random() * 1000 + 1000);
     // });
     Log('ordersToCreate', order);
-    switch (order.name) {
-        case 'Bittrex':
-            return bittrex.orderCreate(order);
-        case 'Cryptopia':
-            return cryptopia.orderCreate(order);
-        case 'HitBTC':
-            return hitbtc.orderCreate(order);
-    }
+    return bittrex.orderCreate(order);
+    // case 'Cryptopia':
+    //     return cryptopia.orderCreate(order);
+    // case 'HitBTC':
+    //     return hitbtc.orderCreate(order);
 };
 
 export const getPendingOrders = () => {
@@ -179,22 +219,108 @@ export const getPendingOrders = () => {
     });
 };
 
+const getMiniOrdersSum = (order) => {
+    const rateComparator = order.type.toUpper() === 'BID' || order.type.toUpper() === 'SELL' ?
+        '<=' : '>=';
+
+    const getOrdersQuery = `SELECT SUM(Amount) AS amount
+                            FROM mini_orders ` +
+        `WHERE PairFrom = ? AND PairTo = ? AND Type = ? ` +
+        `Rate ${rateComparator} ? AND Status = 'pending'`;
+    const updateOrdersQuery = `UPDATE mini_orders
+                               SET Progress = 'added' ` +
+        `WHERE PairFrom = ? AND PairTo = ? AND Type = ? ` +
+        `Rate ${rateComparator} ? AND Status = 'pending'`;
+
+    const options = [order.PairFrom, order.PairTo, order.Type];
+
+    return new Promise((resolve, reject) => {
+        db.beginTransaction((err) => {
+            if (err)
+                reject(err);
+            else
+                db.query(getOrdersQuery, options, (err, sum) => {
+                    if (err)
+                        reject(err);
+                    else
+                        db.query(updateOrdersQuery, options, (err) => {
+                            if (err)
+                                reject(err);
+                            else
+                                db.commit((err) => {
+                                    if (err)
+                                        reject(err);
+                                    else
+                                        resolve(sum);
+                                });
+                        });
+                });
+        });
+    });
+};
+
+export const addMiniOrders = (order) => {
+    const rateComparator = order.Type.toUpperCase() === 'BID' || order.Type.toUpperCase() === 'SELL' ?
+        '<=' : '>=';
+    const setOrdersAddedQuery =
+        `UPDATE mini_orders SET BigOrderId = ? WHERE 
+         PairTo = ? AND PairFrom = ? AND Type = ? AND
+         Rate ${rateComparator} ? AND
+         BigOrderId IS NULL`;
+    const setOrdersAddedOptions = [order.Id, order.PairTo,
+        order.PairFrom, order.Type, order.Rate];
+
+    const getOrdersAddedQuery = 'SELECT SUM(Amount) as sum FROM mini_orders WHERE BigOrderId = ?';
+
+    return new Promise((resolve, reject) => {
+        db.query(setOrdersAddedQuery, setOrdersAddedOptions, (err) => {
+            if (err)
+                reject(err);
+            else
+                db.query(getOrdersAddedQuery, order.Id, (err, res) => {
+                    if (err)
+                        reject(err);
+                    else {
+                        if (res[0].sum)
+                            order.Amount = (Number(order.Amount) + res[0].sum).toFixed(DIGITS);
+                        resolve(order);
+                    }
+                });
+        });
+    });
+};
+
 const processPendingOrders = () => {
     getPendingOrders()
         .then((orders) => {
             orders.forEach((order) => {
-                const filter = getOrderFilter(order);
-                console.log(order.PairFrom + order.PairTo);
-                const ordersToPlace = getOrdersToPlace(order, OrderProvider.Orders[order.PairFrom + order.PairTo][order.Type], filter);
-                ordersToPlace.forEach((orderToPlace) => {
-                    orderToPlace.arPair = [order.PairFrom, order.PairTo];
-                    orderToPlace.type = order.Type;
-                    createOrder(orderToPlace)
-                        .then(saveExternalOrder)
-                        .catch((err) => {
-                            Log('orderCreation', err)
-                        });
-                });
+                addMiniOrders(order)
+                    .then((addedOrder) => {
+                        createOrder(addedOrder)
+                            .then(saveExternalOrder)
+                            .catch((err) => {
+                                Log('orderCreation', err);
+                            });
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        Log('miniOrders', {err: err.toString()});
+                    });
+
+                // OLD V1
+                // const filter = getOrderFilter(order);
+                // console.log(order.PairFrom + order.PairTo);
+                // const ordersToPlace = getOrdersToPlace(order, OrderProvider.Orders[order.PairFrom + order.PairTo]
+                //     [order.Type], filter);
+                // ordersToPlace.forEach((orderToPlace) => {
+                //     orderToPlace.arPair = [order.PairFrom, order.PairTo];
+                //     orderToPlace.type = order.Type;
+                //     createOrder(orderToPlace)
+                //         .then(saveExternalOrder)
+                //         .catch((err) => {
+                //             Log('orderCreation', err)
+                //         });
+                // });
             });
         })
         .catch((err) => {
@@ -207,8 +333,8 @@ export const saveExternalOrder = (order) => {
         'PairTo, Amount, Rate, OrderId) VALUES (?, ?, ?, ?, ?, ?, ?)';
 
     return new Promise((resolve, reject) => {
-        db.query(saveOrderQuery, [order.name, order.type, order.arPair[0],
-            order.arPair[1], order.amount, order.rate, order.order_id], (err, res) => {
+        db.query(saveOrderQuery, ['Bittrex', order.Type, order.PairFrom,
+            order.PairTo, order.Amount, order.Rate, order.order_id], (err, res) => {
             if (err)
                 reject(err);
             resolve(res);
@@ -242,7 +368,9 @@ const setClosedExternalOrders = () => {
                             });
                         break;
                     case 'Cryptopia': //TODO Криптопия дно ебаное нельзя получить свой ордер
-                        getOrderPromise = new Promise(resolve => {resolve(true)});
+                        getOrderPromise = new Promise(resolve => {
+                            resolve(true);
+                        });
                         break;
                     case 'HitBTC':
                         getOrderPromise = hitbtc.getOrder(order.OrderId)
@@ -276,7 +404,7 @@ const setOrderClosed = (orderId) => {
             if (err)
                 reject(err);
             resolve(res);
-        })
+        });
     });
 };
 
@@ -285,4 +413,4 @@ const watchExternalOrders = () => {
 };
 
 setInterval(processPendingOrders, 1e3);
-setInterval(setClosedExternalOrders, 5 * 1e3);
+// setInterval(setClosedExternalOrders, 5 * 1e3);
