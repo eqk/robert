@@ -91,13 +91,14 @@ export const SaveOrder = (order) => {
         const minimum = MinreqDic[order.PairFrom + order.PairTo];
 
         // console.log('amount', order.AmountChange);
-        // console.log('minimum', minimum);
-        // console.log('to big table', order.AmountChange >= minimum);
+        // console.log('rate', order.Rate);
+        // console.log('rate*amount', order.AmountChange * order.Rate);
+        // console.log('rate*amount<0.0005', order.AmountChange * order.Rate < 0.0005);
 
         let table = 'orders';
         if (order.AmountChange < minimum)
             table = 'mini_orders';
-        if (order.PairFrom.toUpperCase() === 'BTC' && (order.AmountChange * order.Rate < 0.0005))
+        if (order.AmountChange * order.Rate < 0.0005)
             table = 'mini_orders';
 
         const insertOrderQuery = 'INSERT INTO ' + table + ' (PairFrom, PairTo, Type, Rate, ' +
