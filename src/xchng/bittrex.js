@@ -210,18 +210,18 @@ export class BittrexService {
 
     orderCreate(order) {
         return new Promise((resolve, reject) => {
-            this.setPair([order.PairFrom, order.PairTo]);
-            const pair = this.pair;
-            if (!pair) throw Error('Pair not set!');
-            const type_url = (order.Type.toUpperCase() === 'SELL' || order.Type.toUpperCase() === 'BID') ? 'selllimit' : 'buylimit';
-
+            //         this.setPair([order.PairFrom, order.PairTo]);
+            //         const pair = this.pair;
+            //         if (!pair) throw Error('Pair not set!');
+            //         const type_url = (order.Type.toUpperCase() === 'SELL' || order.Type.toUpperCase() === 'BID') ? 'selllimit' : 'buylimit';
+            //
     //         setTimeout(() => {
     //             console.log(`Bittrex order:
     // type: ${type_url} : ${typeof type_url}
     // pair: ${pair} : ${typeof pair}
-            // amount: ${order.Amount} : ${typeof order.Amount}
-            // rate: ${order.Rate} : ${typeof order.Rate}`);
-    //             resolve(Object.assign(order, {order_id: ~~(Math.random() * 1000000)}));
+            //         amount: ${order.Amount} : ${typeof order.Amount}
+            //         rate: ${order.Rate} : ${typeof order.Rate}`);
+            //             resolve(Object.assign(order, {order_id: 'f6c2ceaf-b061-4e47-9918-6bef164319ef'}));
     //         }, Math.random() * 2000);
             //TODO UNCOMMENT
             //TODO ERROR RESOLVING

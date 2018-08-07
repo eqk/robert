@@ -117,6 +117,182 @@ export const SaveOrder = (order) => {
     });
 };
 
+export const ProcessOrder = (order) => {
+    return new Promise((resolve, reject) => {
+        try {
+            checkDictionaries(order.PairTo, order.PairFrom);
+        } catch (e) {
+            reject(e);
+        }
+
+        const minor = MiniorDic[order.PairTo];
+        const minimum = MinreqDic[order.PairFrom + order.PairTo];
+
+        order.Amount = Number((order.AmountChange / minor).toFixed(DIGITS));
+
+        getWeightedArithmeticMeanFromQueue(order)
+            .then((mean) => {
+                Log('mean', mean);
+                if (mean.amountSum >= minimum && mean.weightedMean * mean.amountSum >= 0.0005)
+                    return makeOrder(mean, order)
+                        .then((mkOrderRes) => {
+                            setOrdersUsed(mean.ids);
+                            resolve(mkOrderRes);
+                        })
+                        .catch((err) => {
+                            unlockOrders(mean.ids);
+                            reject(err);
+                        });
+                else {
+                    unlockOrders(mean.ids);
+                    return enqueueOrder(order)
+                        .then(resolve)
+                        .catch(reject);
+                }
+            })
+            .catch(reject);
+    });
+};
+
+
+const makeOrder = async (mean, order) => {
+    return new Promise((resolve, reject) => {
+        Log('makingOrder', {mean: mean, order: order});
+        order.Rate = mean.weightedMean;
+        order.Amount = mean.amountSum;
+
+        bittrex.orderCreate(order)
+            .then((res) => {
+                saveExternalOrder(order)
+                    .catch(reject);
+                bittrex.getOrder(res.order_id)
+                    .then((res) => {
+                        resolve({
+                            status: 'Created',
+                            data: res.data
+                        });
+                    })
+                    .catch(reject);
+            })
+            .catch(reject);
+    });
+};
+
+const enqueueOrder = (order) => {
+    return new Promise((resolve, reject) => {
+        const insertFields = 'PairFrom, PairTo, Type, Rate, Amount, RateOpen, AmountOpen, Status, Source, Email, OrderId, OppositeOrderId, OrderType, AmountChange, Total';
+        const query = `INSERT INTO order_queue (PairFrom,
+                                                PairTo,
+                                                Type,
+                                                Rate,
+                                                Amount,
+                                                RateOpen,
+                                                AmountOpen,
+                                                Status,
+                                                Source,
+                                                Email,
+                                                OrderId,
+                                                OppositeOrderId,
+                                                OrderType,
+                                                AmountChange,
+                                                Total)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
+        const insertDate = [order.PairFrom, order.PairTo, order.Type, order.Rate, order.Amount, order.RateOpen, order.AmountOpen, order.Status, order.Source, order.Email, order.OrderId, order.OppositeOrderId, order.OrderType, order.AmountChange, order.Total];
+        db.query(query, insertDate, (err, res) => {
+            if (err)
+                reject(err);
+            else resolve({
+                status: 'Enqueued',
+                data: {
+                    insertId: res.insertId
+                }
+            });
+        });
+    });
+};
+
+const unlockOrders = (ids) => {
+    if (!Array.isArray(ids) || !ids.length)
+        return;
+    const query = `UPDATE order_queue SET LockId = NULL WHERE Id IN (${ids})`;
+    db.query(query);
+};
+
+const setOrdersUsed = (ids) => {
+    if (!Array.isArray(ids) || !ids.length)
+        return;
+    const query = `UPDATE order_queue SET Used = 1 WHERE Id IN (${ids})`;
+    db.query(query);
+};
+
+const getWeightedArithmeticMeanFromQueue = (order) => {
+    const unixtime = Date.now();
+    const queryLock = 'UPDATE order_queue SET LockId = ? WHERE PairTo = ? AND PairFrom = ? AND Type = ? AND LockId IS NULL AND Used = 0';
+    const dataLock = [unixtime, order.PairTo, order.PairFrom, order.Type];
+
+    const queryGetIds = 'SELECT Id FROM order_queue WHERE LockId = ?';
+    const dataGetIds = [unixtime];
+
+    const getSumsQuery = 'SELECT SUM(Amount * Rate) as numerator, SUM(Amount) AS denominator FROM order_queue WHERE LockId = ?';
+    const dataGetSums = [unixtime];
+
+    return new Promise((resolve, reject) => {
+        db.query(queryLock, dataLock, (err) => {
+            if (err)
+                reject(err);
+            else {
+                db.query(queryGetIds, dataGetIds, (err, ids) => {
+                    ids = ids.map((id) => id['Id']);
+                    if (err)
+                        reject(err);
+                    else {
+                        db.query(getSumsQuery, dataGetSums, (err, sums) => {
+                            if (err)
+                                reject(err);
+                            else {
+                                if (isNaN(sums[0]['numerator']) || !sums[0]['numerator'])
+                                    sums[0]['numerator'] = order.Amount * order.Rate;
+                                else
+                                    sums[0]['numerator'] += order.Amount * order.Rate;
+
+                                if (isNaN(sums[0]['denominator']) || !sums[0]['denominator'])
+                                    sums[0]['denominator'] = order.Amount;
+                                else
+                                    sums[0]['denominator'] += +order.Amount;
+
+                                resolve({
+                                    ids: ids,
+                                    weightedMean: sums[0]['numerator'] / sums[0]['denominator'],
+                                    amountSum: sums[0]['denominator']
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    });
+};
+
+const checkDictionaries = (PairTo, PairFrom) => {
+    if (!MiniorDic) {
+        throw new Error('Minor dictionary not defined');
+    }
+
+    if (!MinreqDic) {
+        throw new Error('Minimum dictionary not defined');
+    }
+
+    if (!MiniorDic[PairTo]) {
+        throw new Error(`Pair ${PairTo} doesn't defined in minor dictionary`);
+    }
+
+    if (!MinreqDic[PairFrom + PairTo]) {
+        throw new Error(`Pair ${PairFrom + PairTo} doesn't defined in Minimum dictionary`);
+    }
+    return true;
+};
+
 export const GetOrder = (id, fields = '*') => {
     const getOrderQuery = `SELECT ${fields} FROM orders WHERE Id = ?`;
     return new Promise((resolve, reject) => {
@@ -411,6 +587,10 @@ const setOrderClosed = (orderId) => {
 
 const watchExternalOrders = () => {
 
+};
+
+const groupMiniOrders = (order) => {
+    const getTotalGroupsQuery = '';
 };
 
 setInterval(processPendingOrders, 1e3);
