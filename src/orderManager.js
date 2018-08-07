@@ -140,6 +140,7 @@ export const ProcessOrder = (order) => {
                             resolve(mkOrderRes);
                         })
                         .catch((err) => {
+                            enqueueOrder(order);
                             unlockOrders(mean.ids);
                             reject(err);
                         });
