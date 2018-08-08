@@ -159,12 +159,14 @@ export const ProcessOrder = (order) => {
 const makeOrder = async (mean, order) => {
     return new Promise((resolve, reject) => {
         Log('makingOrder', {mean: mean, order: order});
-        order.Rate = mean.weightedMean;
-        order.Amount = mean.amountSum;
 
-        bittrex.orderCreate(order)
+        const orderToCreate = Object.assign({}, order);
+        orderToCreate.Rate = mean.weightedMean;
+        orderToCreate.Amount = mean.amountSum;
+
+        bittrex.orderCreate(orderToCreate)
             .then((res) => {
-                saveExternalOrder(order)
+                saveExternalOrder(res)
                     .catch(reject);
                 bittrex.getOrder(res.order_id)
                     .then((res) => {
@@ -594,5 +596,5 @@ const groupMiniOrders = (order) => {
     const getTotalGroupsQuery = '';
 };
 
-setInterval(processPendingOrders, 1e3);
+// setInterval(processPendingOrders, 1e3);
 // setInterval(setClosedExternalOrders, 5 * 1e3);
