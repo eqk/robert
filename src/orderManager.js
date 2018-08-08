@@ -198,7 +198,7 @@ const enqueueOrder = (order) => {
                                                 AmountChange,
                                                 Total)
                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
-        const insertDate = [order.PairFrom, order.PairTo, order.Type, order.Rate, order.Amount, order.RateOpen, order.AmountOpen, order.Status, order.Source, order.Email, order.OrderId, order.OppositeOrderId, order.OrderType, order.AmountChange, order.Total];
+        const insertDate = [order.PairFrom, order.PairTo, order.Type, order.Rate, order.Amount, order.RateOpen, order.AmountOpen, order.Status, 'source', order.Email, order.OrderId, order.OppositeOrderId, order.OrderType, order.AmountChange, order.Total];
         db.query(query, insertDate, (err, res) => {
             if (err)
                 reject(err);

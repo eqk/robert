@@ -210,10 +210,10 @@ export class BittrexService {
 
     orderCreate(order) {
         return new Promise((resolve, reject) => {
-            //         this.setPair([order.PairFrom, order.PairTo]);
-            //         const pair = this.pair;
-            //         if (!pair) throw Error('Pair not set!');
-            //         const type_url = (order.Type.toUpperCase() === 'SELL' || order.Type.toUpperCase() === 'BID') ? 'selllimit' : 'buylimit';
+            this.setPair([order.PairFrom, order.PairTo]);
+            const pair = this.pair;
+            if (!pair) throw Error('Pair not set!');
+            const type_url = (order.Type.toUpperCase() === 'SELL' || order.Type.toUpperCase() === 'BID') ? 'selllimit' : 'buylimit';
             //
     //         setTimeout(() => {
     //             console.log(`Bittrex order:
