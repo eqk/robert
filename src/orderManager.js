@@ -31,8 +31,8 @@ export const InitMinorDic =
 export const DIGITS = 12;
 
 const bittrex = new BittrexService({
-    apiKey: '5fdc7db03ec640e0b7c999b2974fff71',
-    apiSecret: '8ce9441e5e554b9e825183593ab7f8ce'
+    apiKey: '4fe0b0195daf4b5ebed8a5257477c8f6',
+    apiSecret: '3b5d527a2d964e9cb77228f2e32e7838'
 });
 const cryptopia = new CryptopiaService({
     apiKey: '5faa3ddfb5534283a582d1658ca6cbfc',
